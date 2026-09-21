@@ -50,8 +50,8 @@ if not subjects:
 else:
     subject_columns = st.columns(2)
     for index, subject in enumerate(subjects):
-        color = subject.get("color", "#8a8f9a")
-        safe_color = color if re.fullmatch(r"#[0-9A-Fa-f]{6}", color) else "#8a8f9a"
+        color = subject.get("color", "#787774")
+        safe_color = color if re.fullmatch(r"#[0-9A-Fa-f]{6}", color) else "#787774"
         with subject_columns[index % 2]:
             with st.container(border=True):
                 st.markdown(
@@ -81,7 +81,7 @@ if editing_subject:
         with st.form(f"edit_subject_{editing_subject['_id']}"):
             edited_name = st.text_input("Nome da disciplina", value=editing_subject["name"])
             edited_color = st.color_picker(
-                "Cor da disciplina", editing_subject.get("color", "#8a8f9a")
+                "Cor da disciplina", editing_subject.get("color", "#787774")
             )
             save_col, cancel_col = st.columns(2)
             save_edit = save_col.form_submit_button(
