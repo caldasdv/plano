@@ -7,7 +7,6 @@ import streamlit as st
 from src.domain.session_rules import effective_status
 from src.ui.components.session_card import render_session_card
 from src.ui.components.study_agenda import render_study_agenda
-from src.ui.components.study_rhythm import render_study_rhythm
 from src.ui.context import load_page_context, load_page_sessions
 from src.ui.components.page_header import render_flow_actions, render_page_header
 from src.ui.feedback import show_action_error
@@ -61,7 +60,6 @@ pending_sessions = [
     session for session in sessions if effective_status(session) != "Concluída"
 ]
 st.caption(f"{week_start:%d/%m} a {week_end:%d/%m/%Y}")
-render_study_rhythm(sessions, week_start)
 summary_columns = st.columns(3)
 summary_columns[0].metric("Sessões", len(sessions))
 summary_columns[1].metric("Tempo planejado", f"{planned_minutes} min")

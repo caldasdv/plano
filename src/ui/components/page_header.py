@@ -21,6 +21,13 @@ def render_page_header(eyebrow: str, title: str, description: str) -> None:
         f'<div class="plan-page-description">{escape(description)}</div>',
         unsafe_allow_html=True,
     )
+    st.markdown(
+        '<div class="plan-header-motif" aria-hidden="true">'
+        '<span class="plan-header-motif-long"></span>'
+        '<span class="plan-header-motif-short"></span>'
+        '<i></i></div>',
+        unsafe_allow_html=True,
+    )
 
 
 def render_flow_actions(current: str) -> None:
