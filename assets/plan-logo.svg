@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
   <title id="title">Plano</title>
   <desc id="desc">Marca geométrica do Plano, um P formado por um caminho de progresso.</desc>
-  <rect width="96" height="96" rx="27" fill="#176B5D"/>
+  <rect width="96" height="96" rx="27" fill="#06457F"/>
   <path d="M29 67V28h18.5c11.3 0 18.5 5.7 18.5 15.5S58.8 59 47.5 59H38" fill="none" stroke="#F4FBF5" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/>
   <circle cx="68" cy="67" r="5" fill="#B9E2C8"/>
   <path d="M68 67c8-7 11-15 8-24" fill="none" stroke="#B9E2C8" stroke-linecap="round" stroke-width="3" opacity=".9"/>

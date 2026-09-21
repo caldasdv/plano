@@ -17,12 +17,12 @@ _TIMETABLE = st.components.v2.component(
     .timetable-hint { display: none; margin: 0 0 .5rem; color: var(--st-gray-text-color); font: .8rem var(--st-font); }
     .timetable-scroll { box-sizing: border-box; max-width: 100%; overflow-x: auto; padding: .15rem .15rem .75rem; scrollbar-color: var(--st-primary-color) var(--st-secondary-background-color); scrollbar-width: thin; }
     .timetable { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .8rem; min-width: 0; width: 100%; }
-    .day { min-width: 0; min-height: 14rem; overflow: hidden; padding: .85rem; border: 1px solid #dce5de; border-radius: 14px; background: #edf2ed; }
+    .day { min-width: 0; min-height: 14rem; overflow: hidden; padding: .85rem; border: 1px solid #a8c4ec; border-radius: 14px; background: #e8eef8; }
     .day h3 { margin: 0 0 .7rem; padding-bottom: .6rem; border-bottom: 1px solid var(--st-border-color); color: var(--st-heading-color); font: 600 .85rem var(--st-heading-font); letter-spacing: .04em; text-transform: uppercase; }
     .empty { margin-top: 2.6rem; color: var(--st-gray-text-color); font: .75rem var(--st-font); text-align: center; }
-    .meeting { display: block; width: 100%; min-height: 5.2rem; margin: .3rem 0; padding: .65rem; border: 1px solid #dce5de; border-left: 3px solid var(--meeting-color, #176b5d); border-radius: 9px; background: #fcfdf9; color: #172529; cursor: pointer; text-align: left; transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease; }
+    .meeting { display: block; width: 100%; min-height: 5.2rem; margin: .3rem 0; padding: .65rem; border: 1px solid #a8c4ec; border-left: 3px solid var(--meeting-color, #0474c4); border-radius: 9px; background: #ffffff; color: #262b40; cursor: pointer; text-align: left; transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease; }
     .meeting:hover { border-color: var(--st-primary-color); box-shadow: 0 4px 12px rgba(23, 107, 93, .12); transform: translateY(-1px); }
-    .meeting.selected { border-color: var(--st-primary-color); background: #e6f2e9; box-shadow: 0 0 0 2px rgba(23, 107, 93, .16), 0 8px 18px rgba(23, 107, 93, .12); transform: translateY(-1px); }
+    .meeting.selected { border-color: #0474c4; background: #a8c4ec; box-shadow: 0 0 0 2px rgba(4, 116, 196, .16), 0 8px 18px rgba(6, 69, 127, .12); transform: translateY(-1px); }
     .meeting:focus-visible { outline: 3px solid var(--st-primary-color); outline-offset: 2px; }
     .meeting-head { display: flex; align-items: center; justify-content: space-between; gap: .4rem; min-width: 0; }
     .meeting-head strong { flex: 0 0 auto; min-width: 0; line-height: 1.15; white-space: nowrap; }
@@ -100,7 +100,7 @@ def _safe_color(value: Any) -> str:
     return (
         value
         if isinstance(value, str) and re.fullmatch(r"#[0-9A-Fa-f]{6}", value)
-        else "#176B5D"
+        else "#0474C4"
     )
 
 

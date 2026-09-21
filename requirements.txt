@@ -4,3 +4,4 @@ python-dotenv>=1.0,<2
 pymongo>=4.9,<5
 dnspython>=2.6,<3
 mongomock>=4.2,<5
+pytest>=8,<9

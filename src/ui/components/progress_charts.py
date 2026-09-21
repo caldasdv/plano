@@ -8,11 +8,11 @@ from typing import Any
 import plotly.graph_objects as go
 
 
-CHART_TEXT = "#172529"
-CHART_MUTED = "#687679"
-CHART_GREEN = "#176b5d"
-CHART_GREEN_SOFT = "#afd1bb"
-CHART_GRID = "rgba(220, 229, 222, .72)"
+CHART_TEXT = "#262b40"
+CHART_MUTED = "#5379ae"
+CHART_GREEN = "#0474c4"
+CHART_GREEN_SOFT = "#a8c4ec"
+CHART_GRID = "rgba(83, 121, 174, .28)"
 
 
 def subject_progress_figure(summary: Sequence[dict[str, Any]]) -> go.Figure:
@@ -50,7 +50,7 @@ def subject_progress_figure(summary: Sequence[dict[str, Any]]) -> go.Figure:
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         font={"color": CHART_MUTED, "family": "Inter, ui-sans-serif, system-ui, sans-serif", "size": 11},
-        hoverlabel={"bgcolor": "#fcfdf9", "bordercolor": "#dce5de", "font": {"color": CHART_TEXT}},
+        hoverlabel={"bgcolor": "#ffffff", "bordercolor": "#5379ae", "font": {"color": CHART_TEXT}},
         xaxis={"showgrid": True, "gridcolor": CHART_GRID, "zeroline": False, "tickfont": {"color": CHART_MUTED}},
         yaxis={"showgrid": False, "tickfont": {"color": CHART_TEXT, "size": 11}},
     )
@@ -67,7 +67,7 @@ def weekly_progress_figure(summary: Sequence[dict[str, Any]]) -> go.Figure:
                 y=[row["planejados"] for row in summary],
                 mode="lines+markers",
                 line={"color": CHART_GREEN_SOFT, "width": 3, "shape": "spline"},
-                marker={"color": "#fcfdf9", "line": {"color": CHART_GREEN_SOFT, "width": 2}, "size": 7},
+                marker={"color": "#ffffff", "line": {"color": CHART_GREEN_SOFT, "width": 2}, "size": 7},
                 hovertemplate="%{x}<br>Planejados: %{y} min<extra></extra>",
             ),
             go.Scatter(
@@ -76,9 +76,9 @@ def weekly_progress_figure(summary: Sequence[dict[str, Any]]) -> go.Figure:
                 y=[row["concluídos"] for row in summary],
                 mode="lines+markers",
                 line={"color": CHART_GREEN, "width": 4, "shape": "spline"},
-                marker={"color": CHART_GREEN, "line": {"color": "#fcfdf9", "width": 2}, "size": 8},
+                marker={"color": CHART_GREEN, "line": {"color": "#ffffff", "width": 2}, "size": 8},
                 fill="tozeroy",
-                fillcolor="rgba(23, 107, 93, .08)",
+                fillcolor="rgba(4, 116, 196, .10)",
                 hovertemplate="%{x}<br>Concluídos: %{y} min<extra></extra>",
             ),
         ]
@@ -92,7 +92,7 @@ def weekly_progress_figure(summary: Sequence[dict[str, Any]]) -> go.Figure:
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         font={"color": CHART_MUTED, "family": "Inter, ui-sans-serif, system-ui, sans-serif", "size": 11},
-        hoverlabel={"bgcolor": "#fcfdf9", "bordercolor": "#dce5de", "font": {"color": CHART_TEXT}},
+        hoverlabel={"bgcolor": "#ffffff", "bordercolor": "#5379ae", "font": {"color": CHART_TEXT}},
         xaxis={"showgrid": False, "zeroline": False, "tickfont": {"color": CHART_MUTED}},
         yaxis={"showgrid": True, "gridcolor": CHART_GRID, "zeroline": False, "tickfont": {"color": CHART_MUTED}},
     )
