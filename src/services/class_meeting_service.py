@@ -34,10 +34,10 @@ class ClassMeetingService:
         meetings = self.repository.list_by_period(user_id, academic_period_id)
         for meeting in meetings:
             subject = subjects_by_id.get(
-                meeting["subject_id"], {"name": "Disciplina indisponível", "color": "#787774"}
+                meeting["subject_id"], {"name": "Disciplina indisponível", "color": "#8a8f9a"}
             )
             meeting["subject_name"] = subject["name"]
-            meeting["subject_color"] = subject.get("color", "#787774")
+            meeting["subject_color"] = subject.get("color", "#8a8f9a")
         return meetings
 
     def create(

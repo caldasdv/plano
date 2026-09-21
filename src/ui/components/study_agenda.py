@@ -16,26 +16,26 @@ _AGENDA = st.components.v2.component(
     "study_agenda",
     html='''<p class="agenda-hint">Deslize para ver a semana completa.</p><div class="agenda-scroll"><div class="agenda" id="agenda-root" role="list" aria-label="Agenda semanal"></div></div>''',
     css='''
-    .agenda-hint { display: none; margin: 0 0 .5rem; color: #687679; font: .8rem var(--st-font); }
-    .agenda-scroll { max-width: 100%; overflow-x: auto; padding: .15rem .15rem .75rem; scrollbar-color: #176b5d #edf2ed; scrollbar-width: thin; }
+    .agenda-hint { display: none; margin: 0 0 .5rem; color: #8a8f9a; font: .8rem var(--st-font); }
+    .agenda-scroll { max-width: 100%; overflow-x: auto; padding: .15rem .15rem .75rem; scrollbar-color: #b49345 #e7d6ba; scrollbar-width: thin; }
     .agenda { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .8rem; min-width: 0; }
-    .day { padding: .8rem; border: 1px solid #dce5de; border-radius: 14px; background: #edf2ed; }
-    .day.today { border-color: #176b5d; box-shadow: 0 0 0 3px rgba(23, 107, 93, .1), 0 10px 20px rgba(23, 107, 93, .08); }
-    .day h3 { margin: 0 0 .9rem; padding-bottom: .7rem; border-bottom: 1px solid #dce5de; color: #0d4d43; font: 600 .95rem var(--st-heading-font); letter-spacing: .04em; text-transform: uppercase; }
-    .day-body { position: relative; min-height: 720px; border-radius: 10px; background: repeating-linear-gradient(to bottom, transparent 0, transparent 29px, #dce5de 30px); }
-    .empty { margin: 0; padding-top: 2rem; color: #687679; font: .75rem var(--st-font); text-align: center; }
-    .session { position: absolute; top: calc(var(--session-top) * 1px); left: 0; width: 100%; min-height: 2.2rem; height: max(36px, calc(var(--session-height) * 1px)); margin: 0; padding: .4rem .55rem; overflow: hidden; border: 1px solid #dce5de; border-left: 4px solid var(--session-color, #176b5d); border-radius: 9px; background: #fcfdf9; color: #172529; text-align: left; cursor: pointer; }
-    .session:hover, .session:focus-visible { border-color: #176b5d; }
-    .session:focus-visible { outline: 3px solid #c58b22; outline-offset: 2px; }
+    .day { padding: .8rem; border: 1px solid #e7d6ba; border-radius: 14px; background: #f4ebdd; }
+    .day.today { border-color: #b49345; box-shadow: 0 0 0 3px rgba(180, 147, 69, .16), 0 10px 20px rgba(26, 36, 62, .1); }
+    .day h3 { margin: 0 0 .9rem; padding-bottom: .7rem; border-bottom: 1px solid #e7d6ba; color: #0e4b3a; font: 600 .95rem var(--st-heading-font); letter-spacing: .04em; text-transform: uppercase; }
+    .day-body { position: relative; min-height: 720px; border-radius: 10px; background: repeating-linear-gradient(to bottom, transparent 0, transparent 29px, #e7d6ba 30px); }
+    .empty { margin: 0; padding-top: 2rem; color: #8a8f9a; font: .75rem var(--st-font); text-align: center; }
+    .session { position: absolute; top: calc(var(--session-top) * 1px); left: 0; width: 100%; min-height: 2.2rem; height: max(36px, calc(var(--session-height) * 1px)); margin: 0; padding: .4rem .55rem; overflow: hidden; border: 1px solid #e7d6ba; border-left: 4px solid var(--session-color, #b49345); border-radius: 9px; background: #ffffff; color: #1a243e; text-align: left; cursor: pointer; }
+    .session:hover, .session:focus-visible { border-color: #b49345; }
+    .session:focus-visible { outline: 3px solid #0e4b3a; outline-offset: 2px; }
     .session strong, .session span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .session strong { color: #0d4d43; font: 700 .82rem var(--st-font); }
+    .session strong { color: #0e4b3a; font: 700 .82rem var(--st-font); }
     .session span { margin-top: .15rem; font: .72rem var(--st-font); line-height: 1.2; }
-    .agenda.dark .day { border-color: #304840; background: #20332e; }
-    .agenda.dark .day h3 { color: #9ce3c5; }
-    .agenda.dark .day-body { background: repeating-linear-gradient(to bottom, transparent 0, transparent 29px, #304840 30px); }
-    .agenda.dark .empty { color: #a7b9b1; }
-    .agenda.dark .session { border-color: #304840; background: #182522; color: #edf7f1; }
-    .agenda.dark .session strong { color: #9ce3c5; }
+    .agenda.dark .day { border-color: #1e96fc; background: #072ac8; }
+    .agenda.dark .day h3 { color: #ffffff; }
+    .agenda.dark .day-body { background: repeating-linear-gradient(to bottom, transparent 0, transparent 29px, #1e96fc 30px); }
+    .agenda.dark .empty { color: #a2d9f9; }
+    .agenda.dark .session { border-color: #1e96fc; background: #072ac8; color: #ffffff; }
+    .agenda.dark .session strong { color: #1e96fc; }
     @media (max-width: 768px) { .agenda-hint { display: block; } .agenda-scroll { -webkit-overflow-scrolling: touch; } .agenda { grid-template-columns: repeat(7, minmax(155px, 1fr)); min-width: 1140px; } }
     ''',
     js='''
@@ -103,10 +103,10 @@ def render_study_agenda(
                 "duration": str(session["duration"]),
                 "start_minute": int(session["study_time"][:2]) * 60 + int(session["study_time"][3:]),
                 "status": effective_status(session),
-                "color": str(session.get("subject_color", "#176B5D"))
+                "color": str(session.get("subject_color", "#B49345"))
                 if isinstance(session.get("subject_color"), str)
                 and re.fullmatch(r"#[0-9A-Fa-f]{6}", session["subject_color"])
-                else "#176B5D",
+                else "#B49345",
             }
         )
     weekdays = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"]

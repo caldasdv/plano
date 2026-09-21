@@ -17,12 +17,12 @@ _TIMETABLE = st.components.v2.component(
     .timetable-hint { display: none; margin: 0 0 .5rem; color: var(--st-gray-text-color); font: .8rem var(--st-font); }
     .timetable-scroll { box-sizing: border-box; max-width: 100%; overflow-x: auto; padding: .15rem .15rem .75rem; scrollbar-color: var(--st-primary-color) var(--st-secondary-background-color); scrollbar-width: thin; }
     .timetable { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .8rem; min-width: 0; width: 100%; }
-    .day { min-width: 0; min-height: 14rem; overflow: hidden; padding: .85rem; border: 1px solid #dce5de; border-radius: 14px; background: #edf2ed; }
+    .day { min-width: 0; min-height: 14rem; overflow: hidden; padding: .85rem; border: 1px solid #e7d6ba; border-radius: 14px; background: #f4ebdd; }
     .day h3 { margin: 0 0 .7rem; padding-bottom: .6rem; border-bottom: 1px solid var(--st-border-color); color: var(--st-heading-color); font: 600 .85rem var(--st-heading-font); letter-spacing: .04em; text-transform: uppercase; }
     .empty { margin-top: 2.6rem; color: var(--st-gray-text-color); font: .75rem var(--st-font); text-align: center; }
-    .meeting { display: block; width: 100%; min-height: 5.2rem; margin: .3rem 0; padding: .65rem; border: 1px solid #dce5de; border-left: 3px solid var(--meeting-color, #176b5d); border-radius: 9px; background: #fcfdf9; color: #172529; cursor: pointer; text-align: left; transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease; }
+    .meeting { display: block; width: 100%; min-height: 5.2rem; margin: .3rem 0; padding: .65rem; border: 1px solid #e7d6ba; border-left: 3px solid var(--meeting-color, #b49345); border-radius: 9px; background: #ffffff; color: #1a243e; cursor: pointer; text-align: left; transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease; }
     .meeting:hover { border-color: var(--st-primary-color); box-shadow: 0 4px 12px rgba(23, 107, 93, .12); transform: translateY(-1px); }
-    .meeting.selected { border-color: var(--st-primary-color); background: #e6f2e9; box-shadow: 0 0 0 2px rgba(23, 107, 93, .16), 0 8px 18px rgba(23, 107, 93, .12); transform: translateY(-1px); }
+    .meeting.selected { border-color: #b49345; background: #e7d6ba; box-shadow: 0 0 0 2px rgba(180, 147, 69, .16), 0 8px 18px rgba(26, 36, 62, .12); transform: translateY(-1px); }
     .meeting:focus-visible { outline: 3px solid var(--st-primary-color); outline-offset: 2px; }
     .meeting-head { display: flex; align-items: center; justify-content: space-between; gap: .4rem; min-width: 0; }
     .meeting-head strong { flex: 0 0 auto; min-width: 0; line-height: 1.15; white-space: nowrap; }
@@ -30,12 +30,12 @@ _TIMETABLE = st.components.v2.component(
     .meeting strong { font: 600 .78rem var(--st-font); }
     .meeting span { margin-top: .35rem; overflow-wrap: anywhere; font: .78rem var(--st-font); line-height: 1.3; }
     .meeting-location { color: var(--st-gray-text-color); font-size: .68rem !important; }
-    .timetable.dark .day { border-color: #304840; background: #20332e; }
-    .timetable.dark .day h3 { color: #9ce3c5; }
-    .timetable.dark .empty { color: #a7b9b1; }
-    .timetable.dark .meeting { border-color: #304840; background: #182522; color: #edf7f1; }
-    .timetable.dark .meeting-location { color: #a7b9b1 !important; }
-    .timetable.dark .meeting.selected { background: #1e493d; }
+    .timetable.dark .day { border-color: #1e96fc; background: #072ac8; }
+    .timetable.dark .day h3 { color: #ffffff; }
+    .timetable.dark .empty { color: #a2d9f9; }
+    .timetable.dark .meeting { border-color: #1e96fc; background: #072ac8; color: #ffffff; }
+    .timetable.dark .meeting-location { color: #a2d9f9 !important; }
+    .timetable.dark .meeting.selected { background: rgba(165, 153, 181, .2); }
     @media (max-width: 640px) and (hover: none) { .timetable-hint { display: block; } .timetable-scroll { -webkit-overflow-scrolling: touch; } .timetable { grid-template-columns: repeat(7, minmax(130px, 1fr)); min-width: 950px; } }
     ''',
     js='''
@@ -100,7 +100,7 @@ def _safe_color(value: Any) -> str:
     return (
         value
         if isinstance(value, str) and re.fullmatch(r"#[0-9A-Fa-f]{6}", value)
-        else "#176B5D"
+        else "#1E96FC"
     )
 
 

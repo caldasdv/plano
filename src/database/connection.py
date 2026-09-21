@@ -35,9 +35,9 @@ def _seed_local_database(database) -> None:
     ).inserted_id
     database.academic_periods.update_one({"_id": period}, {"$set": {"user_id": user_id}})
     subjects = [
-        {"name": "Interação Humano-Computador", "color": "#176b5d"},
-        {"name": "Banco de Dados", "color": "#4b83a6"},
-        {"name": "Engenharia de Software", "color": "#c58b22"},
+        {"name": "Interação Humano-Computador", "color": "#b49345"},
+        {"name": "Banco de Dados", "color": "#0e4b3a"},
+        {"name": "Engenharia de Software", "color": "#8a8f9a"},
     ]
     for item in subjects:
         database.subjects.insert_one(

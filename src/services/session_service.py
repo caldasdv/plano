@@ -24,7 +24,7 @@ class SessionService:
         subjects_by_id = {subject["_id"]: subject for subject in subjects}
         sessions = self.repository.list_by_user(user_id, start_date, end_date)
         for session in sessions:
-            subject = subjects_by_id.get(session["subject_id"], {"name": "Sem disciplina", "color": "#787774"})
+            subject = subjects_by_id.get(session["subject_id"], {"name": "Sem disciplina", "color": "#8a8f9a"})
             session["subject_name"] = subject["name"]
             session["subject_color"] = subject["color"]
         return sessions

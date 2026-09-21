@@ -15,7 +15,7 @@ def render_session_card(row: dict, *, key: str) -> str | None:
     """Renderiza uma sessão e retorna a ação solicitada pelo usuário."""
     with st.container(border=True):
         info_col, status_col = st.columns([5, 1])
-        subject_color = row.get("subject_color", "#787774")
+        subject_color = row.get("subject_color", "#8a8f9a")
         if isinstance(subject_color, str) and re.fullmatch(r"#[0-9A-Fa-f]{6}", subject_color):
             safe_subject_name = escape(str(row["subject_name"]))
             subject_markup = (
