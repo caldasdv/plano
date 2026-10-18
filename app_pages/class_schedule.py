@@ -1,15 +1,16 @@
 """Tela da grade semanal de aulas."""
 
-from datetime import time
-
 import streamlit as st
 
+from src.ui.context import load_current_period_subjects, load_page_context
 from src.ui.components.class_timetable import render_class_timetable
 from src.ui.components.page_header import render_page_header
-from src.ui.context import load_current_period_subjects, load_page_context
 from src.ui.feedback import set_success_flash, show_action_error
 from src.ui.sidebar import render_account_sidebar
 
+
+services, user, _subjects = load_page_context()
+render_account_sidebar(services, user)
 
 WEEKDAYS = [
     "Segunda-feira",
@@ -21,25 +22,6 @@ WEEKDAYS = [
     "Domingo",
 ]
 
-
-def render_class_timetable_fallback(meetings: list[dict], weekdays: list[str]) -> None:
-    """Mantém uma leitura nativa da grade mesmo com componente visual desatualizado."""
-    with st.expander("Ver lista textual da grade", expanded=False):
-        for weekday, weekday_name in enumerate(weekdays):
-            day_meetings = [meeting for meeting in meetings if meeting["weekday"] == weekday]
-            st.markdown(f"**{weekday_name}**")
-            if not day_meetings:
-                st.caption("Livre")
-                continue
-            for meeting in day_meetings:
-                location = f" · {meeting['location']}" if meeting.get("location") else ""
-                st.caption(
-                    f"{meeting['start_time']}–{meeting['end_time']} · "
-                    f"{meeting['subject_name']}{location}"
-                )
-
-services, user, _all_subjects = load_page_context()
-render_account_sidebar(services, user)
 render_page_header(
     "ORGANIZAÇÃO ACADÊMICA",
     "Grade de aulas",
@@ -47,9 +29,7 @@ render_page_header(
 )
 
 current_period_id = user.get("current_academic_period_id")
-subjects = load_current_period_subjects(
-    services, user, retry_key="retry_class_schedule_subjects"
-)
+subjects = load_current_period_subjects(services, user, retry_key="retry_class_schedule_subjects")
 
 if current_period_id is None:
     st.info("Defina um período acadêmico atual antes de montar sua grade.")

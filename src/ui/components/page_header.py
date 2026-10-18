@@ -9,8 +9,9 @@ import streamlit as st
 
 def render_page_header(eyebrow: str, title: str, description: str) -> None:
     """Apresenta contexto, título e objetivo da tela na mesma ordem."""
+    # Adicionado style="font-size: 1rem;" para igualar ao tamanho da descrição
     st.markdown(
-        f'<div class="plan-eyebrow">{escape(eyebrow.capitalize())}</div>',
+        f'<div class="plan-eyebrow" style="font-size: 1.5rem;">{escape(eyebrow.capitalize())}</div>',
         unsafe_allow_html=True,
     )
     st.markdown(
@@ -21,13 +22,7 @@ def render_page_header(eyebrow: str, title: str, description: str) -> None:
         f'<div class="plan-page-description">{escape(description)}</div>',
         unsafe_allow_html=True,
     )
-    st.markdown(
-        '<div class="plan-header-motif" aria-hidden="true">'
-        '<span class="plan-header-motif-long"></span>'
-        '<span class="plan-header-motif-short"></span>'
-        '<i></i></div>',
-        unsafe_allow_html=True,
-    )
+    # O bloco "plan-header-motif" que gerava a linha com o ponto foi removido daqui
 
 
 def render_flow_actions(current: str) -> None:
