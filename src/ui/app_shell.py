@@ -7,8 +7,8 @@ from pathlib import Path
 import streamlit as st
 from dotenv import load_dotenv
 
-from src.ui.styles import apply_styles
 from src.ui.auth import require_login
+from src.ui.styles import apply_styles
 from src.ui.feedback import render_flash
 
 
@@ -25,7 +25,9 @@ def run_app() -> None:
     )
     apply_styles()
     st.logo(str(PROJECT_DIR / "assets" / "plan-wordmark.svg"), size="large")
+
     require_login()
+
     render_flash()
     page = st.navigation(
         {

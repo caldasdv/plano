@@ -4,8 +4,8 @@ from datetime import date
 
 import streamlit as st
 
-from src.ui.components.page_header import render_page_header
 from src.ui.context import load_page_context
+from src.ui.components.page_header import render_page_header
 from src.ui.feedback import set_success_flash, show_action_error
 from src.ui.sidebar import render_account_sidebar
 
