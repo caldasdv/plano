@@ -1,9 +1,14 @@
 """Tela da grade semanal de aulas."""
 
+from datetime import time
+
 import streamlit as st
 
 from src.ui.context import load_current_period_subjects, load_page_context
-from src.ui.components.class_timetable import render_class_timetable
+from src.ui.components.class_timetable import (
+    render_class_timetable,
+    render_class_timetable_fallback,
+)
 from src.ui.components.page_header import render_page_header
 from src.ui.feedback import set_success_flash, show_action_error
 from src.ui.sidebar import render_account_sidebar

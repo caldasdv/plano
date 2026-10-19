@@ -71,13 +71,19 @@ python -m streamlit run app.py
 
 Configure `.streamlit/secrets.toml` a partir de [`.streamlit/secrets.toml.example`](.streamlit/secrets.toml.example), com MongoDB Atlas e Google OIDC. Nunca versione Secrets ou `.env`.
 
+Para ver dados numa conta vazia, entre no app uma vez com o Google e carregue um semestre de exemplo a partir da raiz do repositório. Sem `--apply` o script só simula, e `--remove --apply` apaga o que ele criou.
+
+```bash
+python scripts/seed_sample_account.py --email voce@exemplo.com --apply
+```
+
 ## Modo local
 
 Ative somente com `PLANO_LOCAL_MODE=true`:
 
 - identidade fixa `local-demo-user`;
 - `mongomock` em memória;
-- um usuário, um período e três disciplinas iniciais;
+- um semestre de exemplo com disciplinas, conteúdos, sessões, grade e avaliações;
 - dados descartados ao encerrar o processo;
 - mesmos services e repositories do ambiente real.
 
