@@ -11,6 +11,16 @@ from src.config.runtime import is_local_mode
 from src.ui.feedback import show_action_error
 
 
+def _toggle_theme(services: ApplicationServices, user: dict) -> None:
+    next_mode = not bool(user.get("dark_mode", False))
+    try:
+        services.users.update_dark_mode(user["_id"], next_mode)
+    except Exception as error:
+        show_action_error("salvar a preferência visual", error)
+    else:
+        st.session_state["plan_dark_mode"] = next_mode
+
+
 def render_account_sidebar(services: ApplicationServices, user: dict) -> None:
     st.sidebar.markdown(
         f'<div class="plan-sidebar-user"><strong>{escape(str(user["name"]))}</strong>'
@@ -21,26 +31,23 @@ def render_account_sidebar(services: ApplicationServices, user: dict) -> None:
         st.logout()
     if is_local_mode():
         st.sidebar.caption("Ambiente local · dados temporários")
+        if st.sidebar.button(
+            "Sair da demonstração", width="stretch", key="local_demo_logout"
+        ):
+            st.session_state.pop("plan_local_authenticated", None)
+            st.session_state.pop("plan_local_profile", None)
+            st.rerun()
     st.sidebar.divider()
     dark_mode = bool(user.get("dark_mode", False))
     st.session_state["plan_dark_mode"] = dark_mode
-    if st.sidebar.button(
+    st.sidebar.button(
         "Usar modo claro" if dark_mode else "Usar modo escuro",
         icon=":material/light_mode:" if dark_mode else ":material/dark_mode:",
         width="stretch",
         key="toggle_plan_theme",
-    ):
-        next_mode = not dark_mode
-        try:
-            services.users.update_dark_mode(user["_id"], next_mode)
-        except Exception as error:
-            show_action_error("salvar a preferência visual", error)
-        else:
-            user["dark_mode"] = next_mode
-            st.session_state["plan_dark_mode"] = next_mode
-            st.rerun()
-    dark_mode = bool(user.get("dark_mode", False))
-    st.session_state["plan_dark_mode"] = dark_mode
+        on_click=_toggle_theme,
+        args=(services, user),
+    )
     if dark_mode:
         st.sidebar.markdown(
             '<span class="plan-dark-mode-marker" aria-hidden="true"></span>',

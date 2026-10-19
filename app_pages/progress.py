@@ -99,7 +99,9 @@ else:
             st.subheader("Carga por disciplina")
             st.caption("Minutos planejados e concluídos. Passe o cursor para ver os valores.")
             st.plotly_chart(
-                subject_progress_figure(subject_summary),
+                subject_progress_figure(
+                    subject_summary, dark_mode=bool(user.get("dark_mode", False))
+                ),
                 width="stretch",
                 config={"displayModeBar": False},
             )
@@ -108,7 +110,9 @@ else:
             st.subheader("Ritmo ao longo da semana")
             st.caption("Compare a carga planejada com o que foi concluído em cada dia.")
             st.plotly_chart(
-                weekly_progress_figure(week_summary),
+                weekly_progress_figure(
+                    week_summary, dark_mode=bool(user.get("dark_mode", False))
+                ),
                 width="stretch",
                 config={"displayModeBar": False},
             )

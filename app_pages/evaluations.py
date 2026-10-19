@@ -6,6 +6,7 @@ import streamlit as st
 
 from src.domain.evaluation_rules import EVALUATION_TYPES
 from src.ui.components.page_header import render_flow_actions, render_page_header
+from src.ui.components.progress_charts import evaluation_progress_figure
 from src.ui.context import load_current_period_subjects, load_page_context
 from src.ui.feedback import set_success_flash, show_action_error
 from src.ui.sidebar import render_account_sidebar
@@ -34,19 +35,41 @@ except Exception as error:
     show_action_error("carregar suas avaliações", error)
     st.stop()
 
-graded = [
+selected_subject_id = st.selectbox(
+    "Filtrar por disciplina",
+    [None, *subjects_by_id],
+    format_func=lambda value: "Todas as disciplinas" if value is None else subjects_by_id[value]["name"],
+    key="evaluation_subject_filter",
+)
+filtered_evaluations = [
     item for item in evaluations
+    if selected_subject_id is None or item["subject_id"] == selected_subject_id
+]
+graded = [
+    item for item in filtered_evaluations
     if item.get("score") is not None and item.get("max_score")
 ]
 average = sum(item["score"] / item["max_score"] for item in graded) / len(graded) * 10 if graded else 0
 metric_cols = st.columns(3)
-metric_cols[0].metric("Avaliações", len(evaluations), border=True)
+metric_cols[0].metric("Avaliações", len(filtered_evaluations), border=True)
 metric_cols[1].metric("Registradas", len(graded), border=True)
 metric_cols[2].metric("Média proporcional", f"{average:.1f}/10" if graded else "—", border=True)
 
-if evaluations:
+if graded:
+    st.subheader("Evolução das notas")
+    st.caption("Notas proporcionais de 0 a 10. Avaliações sem nota ficam fora do gráfico.")
+    st.plotly_chart(
+        evaluation_progress_figure(graded, dark_mode=bool(user.get("dark_mode", False))),
+        width="stretch",
+        config={"displayModeBar": False},
+        key="evaluation_grade_chart",
+    )
+elif filtered_evaluations:
+    st.info("As avaliações desta disciplina ainda não têm notas registradas.")
+
+if filtered_evaluations:
     st.subheader("Seu histórico")
-    for item in evaluations:
+    for item in filtered_evaluations:
         with st.container(border=True):
             heading, detail = st.columns([2, 1])
             heading.markdown(f"### {item['title']}")
@@ -58,15 +81,8 @@ if evaluations:
                 percentage = item["score"] / item["max_score"] * 100
                 detail.metric("Nota", f"{item['score']:g}/{item['max_score']:g}")
                 st.progress(min(percentage / 100, 1.0), text=f"{item['evaluation_date']} · {percentage:.0f}%")
-    if len(graded) > 1:
-        st.subheader("Evolução das notas")
-        chart_data = {
-            item["evaluation_date"]: round(item["score"] / item["max_score"] * 10, 2)
-            for item in graded
-        }
-        st.line_chart(chart_data, height=260)
 else:
-    st.info("Você ainda não registrou avaliações. Adicione a primeira para acompanhar sua evolução.")
+    st.info("Não há avaliações para a disciplina selecionada. Adicione uma avaliação para acompanhar suas notas.")
 
 with st.expander("Adicionar avaliação", expanded=not evaluations):
     with st.form("new_evaluation"):
