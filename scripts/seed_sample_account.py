@@ -14,8 +14,10 @@ import argparse
 from pathlib import Path
 import sys
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+PROJECT_DIR = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PROJECT_DIR))
 
+from dotenv import load_dotenv
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 
@@ -45,6 +47,7 @@ def main() -> int:
     parser.add_argument("--apply", action="store_true", help="grava no banco")
     args = parser.parse_args()
 
+    load_dotenv(PROJECT_DIR / ".env")
     settings = get_settings()
     client = MongoClient(settings.mongodb_uri, server_api=ServerApi("1"), serverSelectionTimeoutMS=5000)
     client.admin.command("ping")
