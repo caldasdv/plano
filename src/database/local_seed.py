@@ -1,10 +1,15 @@
-"""Carga demonstrativa do modo local (mongomock em memória)."""
+"""Semestre de exemplo usado no modo local e pelo script de carga do Atlas."""
 
 from __future__ import annotations
 
 from datetime import UTC, date, datetime, timedelta
 
+from src.domain.academic_period_rules import normalize_academic_period_name
+from src.domain.subject_rules import normalize_subject_name
+from src.domain.topic_rules import normalize_topic_title
 
+
+SAMPLE_KEY = "plano-sample-v1"
 SUBJECTS = (
     ("Interação Humano-Computador", "#176b5d", ("Heurísticas", "Acessibilidade", "Avaliação prática")),
     ("Banco de Dados", "#4b83a6", ("Entidades", "Relacionamentos", "Consultas SQL")),
@@ -31,34 +36,49 @@ def seed_local_database(database, today: date | None = None) -> None:
     """Cria um semestre de exemplo na primeira execução local."""
     if database.users.count_documents({}) > 0:
         return
-    today = today or date.today()
-    now = datetime.now(UTC)
-    period_id = database.academic_periods.insert_one(
-        {
-            "name": "Demonstração local",
-            "name_normalized": "demonstracao local",
-            "start_date": (today - timedelta(days=60)).isoformat(),
-            "end_date": (today + timedelta(days=60)).isoformat(),
-            "status": "ACTIVE",
-        }
-    ).inserted_id
     user_id = database.users.insert_one(
         {
             "identity": {"provider": "local-demo", "subject": "local-demo-user"},
             "name": "Estudante local",
             "email": "local@plano.test",
             "weekly_goal_minutes": 300,
-            "current_academic_period_id": period_id,
         }
     ).inserted_id
-    database.academic_periods.update_one({"_id": period_id}, {"$set": {"user_id": user_id}})
-    scope = {"user_id": user_id, "academic_period_id": period_id}
+    seed_sample_semester(database, user_id, "Demonstração local", today)
+
+
+def seed_sample_semester(
+    database, user_id, period_name: str = "Semestre de exemplo", today: date | None = None
+):
+    """Cria um período ativo com disciplinas, conteúdos, sessões, grade e notas.
+
+    Todos os documentos levam `sample_key`, o que permite removê-los depois.
+    """
+    today = today or date.today()
+    now = datetime.now(UTC)
+    period_id = database.academic_periods.insert_one(
+        {
+            "user_id": user_id,
+            "name": period_name,
+            "name_normalized": normalize_academic_period_name(period_name),
+            "start_date": (today - timedelta(days=60)).isoformat(),
+            "end_date": (today + timedelta(days=60)).isoformat(),
+            "status": "ACTIVE",
+            "created_at": now,
+            "updated_at": now,
+            "sample_key": SAMPLE_KEY,
+        }
+    ).inserted_id
+    database.users.update_one(
+        {"_id": user_id}, {"$set": {"current_academic_period_id": period_id}}
+    )
+    scope = {"user_id": user_id, "academic_period_id": period_id, "sample_key": SAMPLE_KEY}
 
     subject_ids = []
     topic_titles = []
     for name, color, topics in SUBJECTS:
         subject_id = database.subjects.insert_one(
-            {**scope, "name": name, "name_normalized": name.lower(), "color": color}
+            {**scope, "name": name, "name_normalized": normalize_subject_name(name), "color": color}
         ).inserted_id
         subject_ids.append(subject_id)
         topic_titles.append(topics)
@@ -69,7 +89,7 @@ def seed_local_database(database, today: date | None = None) -> None:
                     "subject_id": subject_id,
                     "parent_id": None,
                     "title": title,
-                    "title_normalized": title.lower(),
+                    "title_normalized": normalize_topic_title(title),
                     "status": ("MASTERED", "IN_PROGRESS", "NOT_STARTED")[index],
                     "difficulty": ("LOW", "MEDIUM", "HIGH")[index],
                     "created_at": now,
@@ -130,3 +150,5 @@ def seed_local_database(database, today: date | None = None) -> None:
             for index, title, evaluation_type, offset, score in EVALUATIONS
         ]
     )
+    return period_id
+
