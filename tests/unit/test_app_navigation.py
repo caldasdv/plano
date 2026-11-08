@@ -84,16 +84,15 @@ def test_every_page_renders_without_changing_theme(local_app, monkeypatch, dark_
     for page, title in PAGES.items():
         app.switch_page(f"app_pages/{page}.py").run()
         assert_page_and_theme(app, title, dark_mode)
-        assert app.button(key="sidebar_new_session").label == "Nova sessão"
 
 
-def test_new_session_dialog_adds_session_from_any_page(local_app):
+def test_new_session_dialog_adds_session(local_app):
     app = local_app
     database = get_database()
     before = database.study_sessions.count_documents({})
-    app.switch_page("app_pages/progress.py").run()
+    app.switch_page("app_pages/weekly.py").run()
 
-    app.button(key="sidebar_new_session").click().run()
+    app.button(key="weekly_new_session").click().run()
     assert not app.exception
     app.text_input[0].input("Revisar normalização")
     next(button for button in app.button if button.label == "Adicionar sessão").click().run()
@@ -102,6 +101,17 @@ def test_new_session_dialog_adds_session_from_any_page(local_app):
     assert database.study_sessions.count_documents({}) == before + 1
     assert database.study_sessions.find_one({"topic": "Revisar normalização"})["status"] == "Pendente"
     assert "plan_session_dialog" not in app.session_state
+
+
+@pytest.mark.parametrize(("page", "key"), [("overview", "overview_new_session"), ("weekly", "weekly_new_session")])
+def test_planning_pages_show_new_session_button_that_opens_dialog(local_app, page, key):
+    app = local_app
+    app.switch_page(f"app_pages/{page}.py").run()
+
+    app.button(key=key).click().run()
+
+    assert not app.exception
+    assert app.text_input[0].label == "O que você vai estudar? *"
 
 
 def test_completing_session_can_be_undone(local_app):

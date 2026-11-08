@@ -30,7 +30,7 @@ O fluxo cobre períodos, disciplinas, grade de aulas, conteúdos, sessões, aval
 - tópicos e subtópicos de conteúdo;
 - sessões com objetivo, prioridade, duração e conclusão;
 - navegação em quatro lugares fixos: Hoje, Semana, Progresso (metas e notas) e Disciplinas (conteúdos e horários);
-- "Nova sessão" sempre disponível na barra lateral, em diálogo, com opção de desfazer a conclusão;
+- botão "Nova sessão" no topo de Hoje e Semana, em diálogo, com opção de desfazer a conclusão;
 - análise de notas por disciplina;
 - metas adaptativas por notas, dificuldade ou pendências;
 - tema claro/escuro persistido;

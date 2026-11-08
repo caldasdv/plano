@@ -8,7 +8,7 @@ from src.domain.session_rules import effective_status
 from src.ui.components.session_card import render_session_card
 from src.ui.components.study_rhythm import render_study_rhythm
 from src.ui.components.page_header import render_page_header
-from src.ui.components.session_dialog import open_session_dialog
+from src.ui.components.session_dialog import render_new_session_button
 from src.ui.navigation import PERIODS, PROGRESS, SUBJECTS
 from src.ui.context import load_current_period_subjects, load_page_context, load_page_sessions
 from src.ui.feedback import set_success_flash, show_action_error
@@ -42,6 +42,8 @@ if not current_subjects:
         if st.button("Adicionar disciplina", type="primary", icon=SUBJECTS.icon):
             st.switch_page(SUBJECTS.path)
     st.stop()
+
+render_new_session_button("overview_new_session")
 
 week_start = date.today() - timedelta(days=date.today().weekday())
 week_end = week_start + timedelta(days=6)
@@ -119,13 +121,7 @@ st.markdown(
 )
 
 if not day_sessions:
-    st.info("Nenhuma sessão planejada para este dia.")
-    st.button(
-        "Adicionar sessão",
-        icon=":material/add:",
-        key="overview_add_session",
-        on_click=open_session_dialog,
-    )
+    st.info("Nenhuma sessão planejada para este dia. Use \"Nova sessão\" para adicionar uma.")
 
 for row in day_sessions:
     action = render_session_card(row, key=f"overview_session_{row['_id']}")

@@ -1,4 +1,4 @@
-"""Diálogos de criar e editar sessão, disponíveis a partir de qualquer tela."""
+"""Diálogos de criar e editar sessão, abertos a partir de Hoje e Semana."""
 
 from __future__ import annotations
 
@@ -159,6 +159,19 @@ def open_session_dialog(session: dict | None = None) -> None:
     reruns e fechar só quando o usuário salva ou dispensa.
     """
     st.session_state[_DIALOG_STATE_KEY] = {"session": session}
+
+
+def render_new_session_button(key: str) -> None:
+    """Botão principal da tela, logo abaixo do cabeçalho, alinhado à direita."""
+    _, button_column = st.columns([3, 1])
+    button_column.button(
+        "Nova sessão",
+        type="primary",
+        icon=":material/add:",
+        width="stretch",
+        key=key,
+        on_click=open_session_dialog,
+    )
 
 
 def close_session_dialog() -> None:

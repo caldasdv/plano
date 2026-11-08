@@ -7,7 +7,7 @@ import streamlit as st
 from src.domain.session_rules import effective_status
 from src.ui.components.page_header import render_page_header
 from src.ui.components.session_card import render_session_card
-from src.ui.components.session_dialog import open_session_dialog
+from src.ui.components.session_dialog import open_session_dialog, render_new_session_button
 from src.ui.components.study_agenda import render_study_agenda
 from src.ui.components.study_rhythm import render_study_rhythm
 from src.ui.context import load_page_context, load_page_sessions
@@ -23,6 +23,8 @@ render_page_header(
     "Semana",
     "Suas sessões de estudo e aulas da semana. Selecione uma sessão para concluir, editar ou excluir.",
 )
+
+render_new_session_button("weekly_new_session")
 
 
 def complete_session(session: dict) -> None:
@@ -93,14 +95,7 @@ summary_columns[1].metric("Tempo planejado", f"{planned_minutes} min")
 summary_columns[2].metric("Pendentes", len(pending_sessions))
 
 if not sessions:
-    st.info("Sua semana ainda está vazia. Adicione uma sessão para começar a organizar seus estudos.")
-    st.button(
-        "Adicionar sessão",
-        type="primary",
-        icon=":material/add:",
-        key="weekly_add_session",
-        on_click=open_session_dialog,
-    )
+    st.info("Sua semana ainda está vazia. Use \"Nova sessão\" para começar a organizar seus estudos.")
 
 if class_meetings:
     st.caption("Blocos tracejados são aulas da sua grade. Para alterá-las, use Disciplinas.")
