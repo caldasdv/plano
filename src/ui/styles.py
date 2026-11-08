@@ -119,7 +119,7 @@ def apply_styles() -> None:
         .plan-timetable { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .8rem; min-width: 0; }
         .plan-timetable-day { background: var(--plan-input); border: 1px solid var(--plan-border); border-radius: 14px; min-height: 16rem; padding: 1rem; }
         .plan-timetable-day h3 { border-bottom: 1px solid var(--plan-border); color: var(--plan-accent-dark); font-size: .95rem; letter-spacing: .06em; margin: 0 0 .9rem; padding-bottom: .7rem; text-transform: uppercase; }
-        .plan-meeting { background: var(--plan-surface); border-left: 5px solid var(--meeting-color); border-radius: 9px; box-shadow: 0 2px 8px rgba(30, 45, 49, .06); display: flex; flex-direction: column; gap: .3rem; margin-bottom: .7rem; padding: .8rem; }
+        .plan-meeting { background: var(--plan-surface); border-left: 5px solid var(--meeting-color); border-radius: 9px; box-shadow: 0 2px 8px rgba(6, 69, 127, .06); display: flex; flex-direction: column; gap: .3rem; margin-bottom: .7rem; padding: .8rem; }
         .plan-meeting strong { color: var(--plan-text); font-size: .95rem; }
         .plan-meeting span { color: var(--plan-text); font-size: .9rem; line-height: 1.3; }
         .plan-meeting-location { color: var(--plan-muted) !important; font-size: .8rem !important; }
@@ -192,7 +192,7 @@ def apply_styles() -> None:
         .plan-login-orbit { border: 1px solid rgba(4, 116, 196, .22); border-radius: 50%; position: absolute; }
         .plan-login-orbit-one { height: 24rem; transform: rotate(30deg); width: 11rem; }
         .plan-login-orbit-two { height: 11rem; transform: rotate(-38deg); width: 24rem; }
-        .plan-login-week-card { background: rgba(252, 253, 249, .94); border: 1px solid rgba(255,255,255,.85); border-radius: 1.2rem; box-shadow: 0 22px 45px rgba(41, 83, 64, .17); padding: 1.35rem; position: relative; transform: rotate(-5deg); width: min(78%, 17rem); z-index: 1; }
+        .plan-login-week-card { background: rgba(252, 253, 249, .94); border: 1px solid rgba(255,255,255,.85); border-radius: 1.2rem; box-shadow: 0 22px 45px rgba(6, 69, 127, .17); padding: 1.35rem; position: relative; transform: rotate(-5deg); width: min(78%, 17rem); z-index: 1; }
         .plan-login-card-top { color: var(--plan-muted); display: flex; font-size: .67rem; justify-content: space-between; letter-spacing: .08em; text-transform: uppercase; }
         .plan-login-card-top b { color: var(--plan-accent); font-size: .8rem; }
         .plan-login-card-title { color: var(--plan-text); font-size: 1.35rem; font-weight: 750; letter-spacing: -.05em; line-height: 1.08; margin: 1.4rem 0 1.7rem; }
@@ -200,7 +200,7 @@ def apply_styles() -> None:
         .plan-login-bars i { background: #5379ae; border-radius: 99px 99px .2rem .2rem; display: block; flex: 1; height: 42%; }
         .plan-login-bars i:nth-child(2) { height: 68%; } .plan-login-bars i:nth-child(3) { background: var(--plan-accent); height: 88%; } .plan-login-bars i:nth-child(4) { height: 56%; } .plan-login-bars i:nth-child(5) { height: 75%; } .plan-login-bars i:nth-child(6) { height: 48%; } .plan-login-bars i:nth-child(7) { height: 30%; }
         .plan-login-card-foot { color: #5379ae; display: flex; font-size: .57rem; justify-content: space-between; margin-top: .55rem; text-transform: uppercase; }
-        .plan-login-float { background: var(--plan-surface); border: 1px solid rgba(255,255,255,.9); border-radius: .7rem; box-shadow: 0 10px 24px rgba(41, 83, 64, .13); color: var(--plan-accent); font-size: .95rem; font-weight: 800; padding: .65rem .75rem; position: absolute; z-index: 2; }
+        .plan-login-float { background: var(--plan-surface); border: 1px solid rgba(255,255,255,.9); border-radius: .7rem; box-shadow: 0 10px 24px rgba(6, 69, 127, .13); color: var(--plan-accent); font-size: .95rem; font-weight: 800; padding: .65rem .75rem; position: absolute; z-index: 2; }
         .plan-login-float span { color: var(--plan-muted); font-size: .63rem; font-weight: 650; margin-left: .25rem; }
         .plan-login-float-check { left: 7%; top: 24%; transform: rotate(-7deg); } .plan-login-float-focus { bottom: 17%; right: 7%; color: var(--plan-muted); font-size: .6rem; line-height: 1.1; transform: rotate(7deg); } .plan-login-float-focus strong { color: var(--plan-accent-dark); font-size: .95rem; }
         .plan-login-action-label { color: var(--plan-muted); font-size: .78rem; margin: .8rem auto .45rem; max-width: 1000px; text-align: center; }
@@ -246,7 +246,7 @@ def apply_styles() -> None:
             --plan-accent-dark: #a8c4ec;
             --plan-attention: #a8c4ec;
             --plan-sidebar: #06457f;
-            --plan-selection: #06457f;
+            --plan-selection: #0474c4;
             --plan-shadow: 0 12px 28px rgba(0, 0, 0, .16);
             color-scheme: dark;
             background: var(--plan-bg);
@@ -304,7 +304,8 @@ def apply_styles() -> None:
         body:has(.plan-dark-mode-marker) .plan-overview-hero { background: #06457f; border-color: var(--plan-border); box-shadow: var(--plan-shadow); }
         body:has(.plan-dark-mode-marker) .plan-overview-hero p { color: #a8c4ec; }
         body:has(.plan-dark-mode-marker) .plan-overview-hero-stat { background: #06457f; border-color: var(--plan-border); }
-        body:has(.plan-dark-mode-marker) .plan-login-visual { background: #06457f; border-color: var(--plan-border); }
+        body:has(.plan-dark-mode-marker) .plan-rhythm-done > i b { background: #a8c4ec; }
+        body:has(.plan-dark-mode-marker) .plan-login-visual { background: #1a243e; border-color: var(--plan-border); }
         body:has(.plan-dark-mode-marker) .plan-login-week-card,
         body:has(.plan-dark-mode-marker) .plan-login-float { background: var(--plan-surface); border-color: var(--plan-border); }
         @media (prefers-reduced-motion: reduce) {
