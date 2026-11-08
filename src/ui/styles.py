@@ -14,7 +14,7 @@ def apply_styles() -> None:
             --plan-surface: #ffffff;
             --plan-input: #e8eef8;
             --plan-text: #262b40;
-            --plan-muted: #5379ae;
+            --plan-muted: #3f5f8f;
             --plan-border: rgba(83, 121, 174, .35);
             --plan-accent: #0474c4;
             --plan-accent-dark: #06457f;
@@ -45,7 +45,8 @@ def apply_styles() -> None:
         [data-testid="stSidebarNav"] li div a { border-radius: 10px; color: #ffffff; font-weight: 650; padding: .55rem .7rem; }
         [data-testid="stSidebarNav"] li div a:hover { background: rgba(168, 196, 236, .16); color: #ffffff; }
         [data-testid="stSidebarNav"] li div a[aria-current="page"] { background: #0474c4; box-shadow: none; color: #ffffff; }
-        [data-testid="stSidebarNav"] li div a:focus-visible { outline: 3px solid var(--plan-attention); outline-offset: 2px; }
+        [data-testid="stSidebarNav"] li div a:focus-visible, [data-testid="stSidebar"] button:focus-visible { outline: 3px solid #ffffff; outline-offset: 2px; }
+        a:focus-visible, summary:focus-visible, [role="tab"]:focus-visible, [data-testid="stPopover"] button:focus-visible, [data-testid="stButtonGroup"] button:focus-visible, [data-baseweb="checkbox"]:focus-within { outline: 3px solid var(--plan-accent); outline-offset: 2px; }
         .plan-sidebar-brand { align-items: center; display: flex; gap: .7rem; justify-content: flex-start; padding: .25rem .4rem 1rem; text-align: left; }
         .plan-sidebar-brand > div { min-width: 0; text-align: left; }
         .plan-sidebar-brand strong, .plan-sidebar-brand small { display: block; }
@@ -72,7 +73,8 @@ def apply_styles() -> None:
         .plan-header-motif-long { background: var(--plan-accent); width: 3.8rem; }
         .plan-header-motif-short { background: #a8c4ec; width: 1.5rem; }
         .plan-header-motif i { background: #5379ae; height: .4rem; width: .4rem; }
-        [data-testid="stCaptionContainer"] p { color: var(--plan-muted); }
+        [data-testid="stCaptionContainer"] { opacity: 1; }
+        [data-testid="stCaptionContainer"] p { color: var(--plan-muted); opacity: 1; }
         [data-testid="stVerticalBlockBorderWrapper"] { background: var(--plan-surface); border-color: var(--plan-border); border-radius: 18px; box-shadow: var(--plan-shadow); }
         [data-testid="stForm"] { background: var(--plan-surface); border: 1px solid var(--plan-border); border-radius: 20px; box-shadow: var(--plan-shadow); padding: 1rem 1.15rem 1.15rem; }
         [data-baseweb="input"], [data-baseweb="textarea"], [data-baseweb="select"] > div { background: var(--plan-input); border-color: var(--plan-border); border-radius: 10px; transition: border-color .15s ease, box-shadow .15s ease; }
@@ -140,14 +142,14 @@ def apply_styles() -> None:
         .plan-overview-divider { border-top: 1px solid var(--plan-border); margin: 1.25rem 0 .75rem; }
         .plan-overview-day-title { color: var(--plan-text); font-size: 1.55rem; letter-spacing: -.045em; line-height: 1.2; margin: 1rem 0 .75rem; }
         .plan-overview-hero-copy { position: relative; z-index: 2; }
-        .plan-overview-hero-kicker { color: #a8c4ec; display: block; font-size: .68rem; font-weight: 800; letter-spacing: .15em; margin-bottom: .85rem; }
+        .plan-overview-hero-kicker { color: #dce8f8; display: block; font-size: .75rem; font-weight: 800; letter-spacing: .15em; margin-bottom: .85rem; }
         .plan-overview-hero h2 { color: #ffffff; font-size: clamp(2rem, 4vw, 3rem); letter-spacing: -.065em; line-height: .98; margin: 0; }
         .plan-overview-hero h2 em { color: #a8c4ec; font-style: normal; }
         .plan-overview-hero p { color: #a8c4ec; font-size: .92rem; line-height: 1.45; margin: 1rem 0 0; max-width: 19rem; }
         .plan-overview-hero-stat { background: rgba(245, 251, 246, .12); border: 1px solid rgba(245, 251, 246, .2); border-radius: 16px; bottom: 1.8rem; padding: .85rem 1rem; position: absolute; right: 2rem; width: 10.5rem; z-index: 2; }
-        .plan-overview-hero-stat > span, .plan-overview-hero-stat > small { color: #a8c4ec; display: block; font-size: .66rem; }
+        .plan-overview-hero-stat > span, .plan-overview-hero-stat > small { color: #dce8f8; display: block; font-size: .75rem; }
         .plan-overview-hero-stat strong { color: #fff; display: block; font-size: 2rem; letter-spacing: -.06em; line-height: 1.15; margin: .25rem 0 .55rem; }
-        .plan-overview-hero-stat strong small { color: #a8c4ec; display: inline; font-size: .75rem; letter-spacing: 0; }
+        .plan-overview-hero-stat strong small { color: #dce8f8; display: inline; font-size: .75rem; letter-spacing: 0; }
         .plan-overview-hero-track { background: rgba(255,255,255,.18); border-radius: 99px; height: .35rem; margin-bottom: .45rem; overflow: hidden; }
         .plan-overview-hero-track i { background: #0474c4; border-radius: inherit; display: block; height: 100%; }
         .plan-overview-orbit { border: 1px solid rgba(168, 196, 236, .3); border-radius: 50%; position: absolute; }
@@ -158,17 +160,17 @@ def apply_styles() -> None:
         .plan-rhythm { background: var(--plan-surface); border: 1px solid var(--plan-border); border-radius: 18px; box-shadow: var(--plan-shadow); margin: .85rem 0 1.25rem; padding: 1rem 1.1rem .9rem; }
         .plan-rhythm-heading { align-items: baseline; display: flex; justify-content: space-between; margin-bottom: .8rem; }
         .plan-rhythm-heading strong { color: var(--plan-text); font-size: .95rem; letter-spacing: -.02em; }
-        .plan-rhythm-heading span { color: var(--plan-muted); font-size: .67rem; }
+        .plan-rhythm-heading span { color: var(--plan-muted); font-size: .75rem; }
         .plan-rhythm-grid { display: grid; gap: .55rem; grid-template-columns: repeat(7, minmax(0, 1fr)); }
         .plan-rhythm-day { align-items: center; background: var(--plan-input); border: 1px solid transparent; border-radius: 12px; display: flex; flex-direction: column; min-height: 5.7rem; padding: .55rem .35rem .45rem; }
-        .plan-rhythm-day > span { color: var(--plan-muted); font-size: .62rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+        .plan-rhythm-day > span { color: var(--plan-muted); font-size: .72rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
         .plan-rhythm-day > strong { color: var(--plan-text); font-size: 1rem; margin: .2rem 0 .25rem; }
         .plan-rhythm-day > i { background: #a8c4ec; border-radius: 99px; display: flex; height: 1.45rem; justify-content: center; overflow: hidden; position: relative; width: .35rem; }
         .plan-rhythm-day > i b { background: var(--plan-accent); border-radius: inherit; bottom: 0; display: block; position: absolute; width: 100%; }
-        .plan-rhythm-day > small { color: var(--plan-muted); font-size: .62rem; margin-top: .3rem; }
-        .plan-rhythm-done { background: var(--plan-selection); border-color: var(--plan-accent); } .plan-rhythm-done > strong { color: var(--plan-accent-dark); }
+        .plan-rhythm-day > small { color: var(--plan-muted); font-size: .72rem; margin-top: .3rem; }
+        .plan-rhythm-done { background: var(--plan-selection); border-color: var(--plan-accent); } .plan-rhythm-done > :is(strong, span, small) { color: var(--plan-accent-dark); }
         .plan-rhythm-planned { border-color: #a8c4ec; } .plan-rhythm-planned > i b { background: var(--plan-attention); }
-        .plan-rhythm-empty { opacity: .62; }
+        .plan-rhythm-empty { border-style: dashed; border-color: var(--plan-border); }
         .plan-quick-actions { align-items: center; display: flex; margin: 1.2rem 0 .55rem; }
         .plan-quick-actions span { color: var(--plan-muted); font-size: .78rem; font-weight: 700; }
         .plan-topic-path { display: grid; gap: .65rem; padding: .25rem 0 .85rem; }
@@ -308,6 +310,11 @@ def apply_styles() -> None:
         body:has(.plan-dark-mode-marker) .plan-overview-hero p { color: #a8c4ec; }
         body:has(.plan-dark-mode-marker) .plan-overview-hero-stat { background: #06457f; border-color: var(--plan-border); }
         body:has(.plan-dark-mode-marker) .plan-rhythm-done > i b { background: #a8c4ec; }
+        body:has(.plan-dark-mode-marker) .plan-rhythm-done > :is(strong, span, small) { color: #ffffff; }
+        body:has(.plan-dark-mode-marker) .plan-eyebrow { color: var(--plan-muted); }
+        body:has(.plan-dark-mode-marker) .plan-eyebrow::before { background: var(--plan-muted); }
+        body:has(.plan-dark-mode-marker) [data-testid="stButtonGroup"] button:not([aria-checked="true"]):not([kind*="Active"]) { background: var(--plan-input); border-color: var(--plan-border); color: var(--plan-text); }
+        body:has(.plan-dark-mode-marker) a:focus-visible, body:has(.plan-dark-mode-marker) summary:focus-visible, body:has(.plan-dark-mode-marker) .stButton button:focus-visible { outline-color: #ffffff; }
         body:has(.plan-dark-mode-marker) [data-testid="stTable"] table { background: var(--plan-surface); border-color: var(--plan-border); color: var(--plan-text); }
         body:has(.plan-dark-mode-marker) [data-testid="stTable"] :is(th, td) { background: var(--plan-surface); border-color: var(--plan-border); color: var(--plan-text); }
         body:has(.plan-dark-mode-marker) [data-testid="stTable"] th { background: var(--plan-input); color: var(--plan-muted); }

@@ -71,8 +71,8 @@ st.markdown(
             <h2>Pequenos blocos.<br><em>Um semestre inteiro.</em></h2>
             <p>Você já tem um mapa. Agora é só escolher o próximo passo.</p>
         </div>
-        <div class="plan-overview-orbit plan-overview-orbit-a"></div>
-        <div class="plan-overview-orbit plan-overview-orbit-b"></div>
+        <div class="plan-overview-orbit plan-overview-orbit-a" aria-hidden="true"></div>
+        <div class="plan-overview-orbit plan-overview-orbit-b" aria-hidden="true"></div>
         <div class="plan-overview-hero-stat">
             <span>pulso da semana</span>
             <strong>{completed_minutes}<small> min</small></strong>

@@ -16,14 +16,14 @@ _AGENDA = st.components.v2.component(
     "study_agenda",
     html='''<p class="agenda-hint">Deslize para ver a semana completa.</p><div class="agenda-scroll"><div class="agenda" id="agenda-root" role="list" aria-label="Agenda semanal"></div></div>''',
     css='''
-    .agenda-hint { display: none; margin: 0 0 .5rem; color: #5379ae; font: .8rem var(--st-font); }
+    .agenda-hint { display: none; margin: 0 0 .5rem; color: #3f5f8f; font: .8rem var(--st-font); }
     .agenda-scroll { max-width: 100%; overflow-x: auto; padding: .15rem .15rem .75rem; scrollbar-color: #0474c4 #e8eef8; scrollbar-width: thin; }
     .agenda { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .8rem; min-width: 0; }
     .day { padding: .8rem; border: 1px solid #a8c4ec; border-radius: 14px; background: #e8eef8; }
     .day.today { border-color: #0474c4; box-shadow: 0 0 0 3px rgba(4, 116, 196, .12), 0 10px 20px rgba(6, 69, 127, .1); }
     .day h3 { margin: 0 0 .9rem; padding-bottom: .7rem; border-bottom: 1px solid #a8c4ec; color: #06457f; font: 600 .95rem var(--st-heading-font); letter-spacing: .04em; text-transform: uppercase; }
     .day-body { position: relative; min-height: 720px; border-radius: 10px; background: repeating-linear-gradient(to bottom, transparent 0, transparent 29px, #a8c4ec 30px); }
-    .empty { margin: 0; padding-top: 2rem; color: #5379ae; font: .75rem var(--st-font); text-align: center; }
+    .empty { margin: 0; padding-top: 2rem; color: #3f5f8f; font: .75rem var(--st-font); text-align: center; }
     .session { position: absolute; top: calc(var(--session-top) * 1px); left: 0; width: 100%; min-height: 2.2rem; height: max(36px, calc(var(--session-height) * 1px)); margin: 0; padding: .4rem .55rem; overflow: hidden; border: 1px solid #a8c4ec; border-left: 4px solid var(--session-color, #0474c4); border-radius: 9px; background: #ffffff; color: #262b40; text-align: left; cursor: pointer; }
     .session:hover, .session:focus-visible { border-color: #0474c4; }
     .session:focus-visible { outline: 3px solid #a8c4ec; outline-offset: 2px; }
