@@ -23,7 +23,7 @@ from pymongo.server_api import ServerApi
 
 from src.config.settings import get_settings
 from src.database.indexes import ensure_indexes
-from src.database.local_seed import SAMPLE_KEY, seed_sample_semester
+from src.database.sample_seed import SAMPLE_KEY, seed_sample_semester
 
 COLLECTIONS = (
     "study_sessions",

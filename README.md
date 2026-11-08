@@ -81,9 +81,9 @@ python scripts/seed_sample_account.py --email voce@exemplo.com --apply
 
 Ative somente com `PLANO_LOCAL_MODE=true`:
 
-- identidade fixa `local-demo-user`;
+- entrada pela demonstração (`local-demo-user`) ou por um plano vazio (`local-empty-user`);
 - `mongomock` em memória;
-- um semestre de exemplo com disciplinas, conteúdos, sessões, grade e avaliações;
+- um mês de aulas, sessões e avaliações em seis disciplinas;
 - dados descartados ao encerrar o processo;
 - mesmos services e repositories do ambiente real.
 

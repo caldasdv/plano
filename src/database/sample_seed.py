@@ -1,4 +1,4 @@
-"""Semestre de exemplo usado no modo local e pelo script de carga do Atlas."""
+"""Semestre de exemplo carregado numa conta do Atlas por scripts/seed_sample_account.py."""
 
 from __future__ import annotations
 
@@ -30,21 +30,6 @@ EVALUATIONS = (
     (1, "Prova 1", "Prova", -12, 5.5),
     (2, "Prova 1", "Prova", -6, 7.0),
 )
-
-
-def seed_local_database(database, today: date | None = None) -> None:
-    """Cria um semestre de exemplo na primeira execução local."""
-    if database.users.count_documents({}) > 0:
-        return
-    user_id = database.users.insert_one(
-        {
-            "identity": {"provider": "local-demo", "subject": "local-demo-user"},
-            "name": "Estudante local",
-            "email": "local@plano.test",
-            "weekly_goal_minutes": 300,
-        }
-    ).inserted_id
-    seed_sample_semester(database, user_id, "Demonstração local", today)
 
 
 def seed_sample_semester(
