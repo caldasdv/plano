@@ -13,6 +13,7 @@ class FakeSessionRepository:
         self.created = []
         self.updated = []
         self.completed = []
+        self.reopened = []
         self.deleted = []
 
     def list_by_user(self, user_id, start_date=None, end_date=None):
@@ -28,6 +29,9 @@ class FakeSessionRepository:
 
     def mark_completed(self, session_id, user_id):
         self.completed.append((session_id, user_id))
+
+    def mark_pending(self, session_id, user_id):
+        self.reopened.append((session_id, user_id))
 
     def update(self, session_id, user_id, data):
         self.updated.append((session_id, user_id, data))
@@ -439,3 +443,12 @@ def test_user_service_updates_current_academic_period():
     UserService(repository).update_current_academic_period("user-id", "period-id")
 
     assert repository.current_period == ("user-id", "period-id")
+
+
+def test_reopen_returns_completed_session_to_pending():
+    repository = FakeSessionRepository()
+    service = SessionService(repository, subject_repository=None)
+
+    service.reopen("session-id", "user-id")
+
+    assert repository.reopened == [("session-id", "user-id")]

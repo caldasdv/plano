@@ -4,25 +4,29 @@ from datetime import date, timedelta
 
 import streamlit as st
 
-from src.services.report_service import (
-    build_evaluation_summary,
-    build_subject_summary,
-    build_week_summary,
-)
-from src.ui.components.page_header import render_flow_actions, render_page_header
+from src.services.report_service import build_subject_summary, build_week_summary
+from src.ui.components.page_header import render_page_header
 from src.ui.components.progress_charts import subject_progress_figure, weekly_progress_figure
 from src.ui.components.progress_summary import render_subject_progress_summary
-from src.ui.context import load_page_context, load_page_sessions
-from src.ui.feedback import show_action_error
+from src.ui.context import load_current_period_subjects, load_page_context, load_page_sessions
+from src.ui.sections.grades import render_grades_section
+from src.ui.sections.weekly_goal import render_weekly_goal_section
 from src.ui.sidebar import render_account_sidebar
 
 
 services, user, subjects = load_page_context()
 render_account_sidebar(services, user)
 
-render_page_header("ACOMPANHAMENTO", "Seu progresso", "Entenda sua carga de estudos e o que já foi concluído.")
-render_flow_actions("Progresso")
-selected_week_day = st.date_input(
+render_page_header(
+    "ACOMPANHAMENTO",
+    "Progresso",
+    "Sua meta da semana, o que já foi estudado e como estão as notas.",
+)
+render_weekly_goal_section(services, user, subjects)
+
+st.header("Estudo da semana", anchor="estudo-da-semana")
+filter_week, filter_subject = st.columns(2)
+selected_week_day = filter_week.date_input(
     "Escolha um dia da semana",
     value=date.today() - timedelta(days=date.today().weekday()),
     format="DD/MM/YYYY",
@@ -40,16 +44,9 @@ progress_sessions = load_page_sessions(
     end_date=week_end,
     retry_key="retry_progress_sessions",
 )
-try:
-    evaluations = services.evaluations.list_for_period(
-        user["_id"], user.get("current_academic_period_id"), subjects
-    )
-except Exception as error:
-    show_action_error("carregar sua análise de avaliações", error)
-    evaluations = []
 subjects_by_id = {subject["_id"]: subject for subject in subjects}
 subject_options = [None, *subjects_by_id]
-selected_subject_id = st.selectbox(
+selected_subject_id = filter_subject.selectbox(
     "Disciplina",
     subject_options,
     format_func=lambda value: (
@@ -133,24 +130,10 @@ else:
             width="stretch",
         )
 
-st.subheader("Análise de avaliações")
-evaluation_summary = build_evaluation_summary(evaluations, filtered_subjects)
-if not evaluation_summary:
-    st.info("Registre provas, trabalhos ou exercícios para visualizar sua análise de notas.")
-else:
-    st.table(
-        [
-            {
-                "Disciplina": row["disciplina"],
-                "Avaliações": row["avaliacoes"],
-                "Média": f"{row['media']:.1f}/10",
-                "Aproveitamento": f"{row['aproveitamento'] * 100:.0f}%",
-            }
-            for row in evaluation_summary
-        ],
-        hide_index=True,
-        width="stretch",
-    )
-
 st.subheader("Detalhamento por disciplina")
 render_subject_progress_summary(subject_summary)
+
+current_subjects = load_current_period_subjects(
+    services, user, retry_key="retry_progress_current_subjects"
+)
+render_grades_section(services, user, current_subjects, selected_subject_id)

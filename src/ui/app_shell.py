@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from src.ui.auth import require_login
 from src.ui.styles import apply_styles
 from src.ui.feedback import render_flash
+from src.ui.navigation import MAIN_PLACES, SETTINGS, TODAY
 
 
 PROJECT_DIR = Path(__file__).resolve().parents[2]
@@ -31,41 +32,12 @@ def run_app() -> None:
     render_flash()
     page = st.navigation(
         {
-            "Plano": [
-                st.Page("app_pages/overview.py", title="Hoje", icon=":material/home:"),
-                st.Page("app_pages/goals.py", title="Metas", icon=":material/track_changes:"),
-                st.Page(
-                    "app_pages/new_session.py",
-                    title="Nova sessão",
-                    icon=":material/add_circle:",
-                ),
-                st.Page(
-                    "app_pages/weekly.py",
-                    title="Semana",
-                    icon=":material/calendar_view_week:",
-                ),
+            "": [
+                st.Page(place.path, title=place.title, icon=place.icon, default=place is TODAY)
+                for place in MAIN_PLACES
             ],
-            "Acompanhar": [
-                st.Page("app_pages/progress.py", title="Progresso", icon=":material/analytics:"),
-                st.Page("app_pages/evaluations.py", title="Avaliações", icon=":material/assignment:"),
-            ],
-            "Organizar": [
-                st.Page("app_pages/subjects.py", title="Disciplinas", icon=":material/menu_book:"),
-                st.Page(
-                    "app_pages/class_schedule.py",
-                    title="Grade de aulas",
-                    icon=":material/calendar_view_week:",
-                ),
-                st.Page(
-                    "app_pages/topics.py",
-                    title="Conteúdos",
-                    icon=":material/account_tree:",
-                ),
-                st.Page(
-                    "app_pages/academic_periods.py",
-                    title="Períodos acadêmicos",
-                    icon=":material/date_range:",
-                ),
+            "Ajustes": [
+                st.Page(item.path, title=item.title, icon=item.icon) for item in SETTINGS
             ],
         },
         position="sidebar",

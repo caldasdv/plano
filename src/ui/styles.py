@@ -41,6 +41,7 @@ def apply_styles() -> None:
         [data-testid="stSidebarNav"] { border-bottom: 1px solid var(--plan-border); padding: 0 .45rem 1rem; }
         [data-testid="stSidebarNav"] ul { gap: .2rem; }
         [data-testid="stSidebarNav"] > ul > li > div:not(:has(a)) { color: #a8c4ec; font-size: .68rem; font-weight: 800; letter-spacing: .12em; margin: 1.1rem .7rem .35rem; text-transform: uppercase; }
+        [data-testid="stNavSectionHeader"], [data-testid="stNavSectionHeader"] p { color: #a8c4ec; font-size: .72rem; font-weight: 800; letter-spacing: .12em; margin: 1.1rem .7rem .35rem; text-transform: uppercase; }
         [data-testid="stSidebarNav"] li div a { border-radius: 10px; color: #ffffff; font-weight: 650; padding: .55rem .7rem; }
         [data-testid="stSidebarNav"] li div a:hover { background: rgba(168, 196, 236, .16); color: #ffffff; }
         [data-testid="stSidebarNav"] li div a[aria-current="page"] { background: #0474c4; box-shadow: none; color: #ffffff; }
@@ -112,6 +113,8 @@ def apply_styles() -> None:
         .stButton button:focus-visible, .stFormSubmitButton button:focus-visible,
         input:focus-visible, textarea:focus-visible, [role="combobox"]:focus-visible { outline: 3px solid var(--plan-attention); outline-offset: 2px; }
         button, input, textarea, select { min-height: 2.5rem; }
+        .plan-subject-title { align-items: center; display: flex; font-size: 1.45rem; gap: .2rem; margin: 0; }
+        .plan-subject-title .subject-dot { height: .85rem; width: .85rem; }
         .subject-dot { display: inline-block; width: .7rem; height: .7rem; border-radius: 50%; margin-right: .35rem; vertical-align: .05rem; }
         .plan-subject-swatch { width: 1rem; height: 1rem; border-radius: 50%; margin-bottom: .7rem; }
         .plan-timetable-hint { color: var(--plan-muted); display: none; font-size: .8rem; margin: -.25rem 0 .5rem; }

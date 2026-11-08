@@ -9,16 +9,16 @@ from streamlit.testing.v1 import AppTest
 
 from src.database.connection import get_database
 from src.services.user_service import UserService
+from src.ui.navigation import MAIN_PLACES, SETTINGS
 
 
 APP_PATH = Path(__file__).resolve().parents[2] / "app.py"
-FLOW_PAGES = {
-    "overview": ("flow_today", "Olá, Estudante local"),
-    "goals": ("flow_goals", "Metas"),
-    "new_session": ("flow_session", "Nova sessão"),
-    "weekly": ("flow_week", "Visão semanal"),
-    "progress": ("flow_progress", "Seu progresso"),
-    "evaluations": ("flow_evaluations", "Avaliações"),
+PAGES = {
+    "overview": "Olá, Estudante local",
+    "weekly": "Semana",
+    "progress": "Progresso",
+    "subjects": "Disciplinas",
+    "academic_periods": "Períodos acadêmicos",
 }
 
 
@@ -44,6 +44,16 @@ def local_app(monkeypatch):
             sys.modules.pop(name, None)
 
 
+def metric_value(app, label):
+    return next(item.value for item in app.metric if item.label == label)
+
+
+def grade_chart(app):
+    return next(
+        chart for chart in app.get("plotly_chart") if "evaluation_grade_chart" in chart.proto.id
+    )
+
+
 def assert_page_and_theme(app, title, dark_mode):
     assert not app.exception
     assert not app.error
@@ -56,10 +66,13 @@ def assert_page_and_theme(app, title, dark_mode):
     ) is dark_mode
 
 
+def test_navigation_has_four_main_places_in_cycle_order():
+    assert [place.title for place in MAIN_PLACES] == ["Hoje", "Semana", "Progresso", "Disciplinas"]
+    assert all((APP_PATH.parent / place.path).exists() for place in (*MAIN_PLACES, *SETTINGS))
+
+
 @pytest.mark.parametrize("dark_mode", [False, True])
-def test_navigation_buttons_reach_their_pages_without_changing_theme(
-    local_app, monkeypatch, dark_mode
-):
+def test_every_page_renders_without_changing_theme(local_app, monkeypatch, dark_mode):
     app = local_app
     if dark_mode:
         app.button(key="toggle_plan_theme").click().run()
@@ -68,31 +81,52 @@ def test_navigation_buttons_reach_their_pages_without_changing_theme(
         raise AssertionError("Navegação não deve alterar a preferência de tema.")
 
     monkeypatch.setattr(UserService, "update_dark_mode", unexpected_theme_change)
-    for origin in FLOW_PAGES:
-        for destination, (key, title) in FLOW_PAGES.items():
-            if origin == destination:
-                continue
-            app.switch_page(f"app_pages/{origin}.py").run()
-            app.button(key=key).click().run()
-            assert_page_and_theme(app, title, dark_mode)
-
-    for key, title in (
-        ("overview_quick_session", "Nova sessão"),
-        ("overview_quick_week", "Visão semanal"),
-        ("overview_quick_topics", "Conteúdos"),
-    ):
-        app.switch_page("app_pages/overview.py").run()
-        app.button(key=key).click().run()
+    for page, title in PAGES.items():
+        app.switch_page(f"app_pages/{page}.py").run()
         assert_page_and_theme(app, title, dark_mode)
 
-    for destination, title in (
-        ("subjects", "Disciplinas"),
-        ("class_schedule", "Grade de aulas"),
-        ("topics", "Conteúdos"),
-        ("academic_periods", "Períodos acadêmicos"),
-    ):
-        app.switch_page(f"app_pages/{destination}.py").run()
-        assert_page_and_theme(app, title, dark_mode)
+
+def test_new_session_dialog_adds_session(local_app):
+    app = local_app
+    database = get_database()
+    before = database.study_sessions.count_documents({})
+    app.switch_page("app_pages/weekly.py").run()
+
+    app.button(key="weekly_new_session").click().run()
+    assert not app.exception
+    app.text_input[0].input("Revisar normalização")
+    next(button for button in app.button if button.label == "Adicionar sessão").click().run()
+
+    assert not app.exception
+    assert database.study_sessions.count_documents({}) == before + 1
+    assert database.study_sessions.find_one({"topic": "Revisar normalização"})["status"] == "Pendente"
+    assert "plan_session_dialog" not in app.session_state
+
+
+@pytest.mark.parametrize(("page", "key"), [("overview", "overview_new_session"), ("weekly", "weekly_new_session")])
+def test_planning_pages_show_new_session_button_that_opens_dialog(local_app, page, key):
+    app = local_app
+    app.switch_page(f"app_pages/{page}.py").run()
+
+    app.button(key=key).click().run()
+
+    assert not app.exception
+    assert app.text_input[0].label == "O que você vai estudar? *"
+
+
+def test_completing_session_can_be_undone(local_app):
+    app = local_app
+    database = get_database()
+    pending = database.study_sessions.find_one(
+        {"study_date": date.today().isoformat(), "status": "Pendente"}
+    )
+    app.button(key=f"overview_session_{pending['_id']}_complete").click().run()
+    assert database.study_sessions.find_one({"_id": pending["_id"]})["status"] == "Concluída"
+
+    app.button(key="flash_undo_button").click().run()
+
+    assert not app.exception
+    assert database.study_sessions.find_one({"_id": pending["_id"]})["status"] == "Pendente"
 
 
 @pytest.mark.parametrize("dark_mode", [False, True])
@@ -102,9 +136,9 @@ def test_navigation_uses_saved_theme_instead_of_old_session_value(local_app, dar
     database.users.update_one({"_id": user["_id"]}, {"$set": {"dark_mode": dark_mode}})
     local_app.session_state["plan_dark_mode"] = not dark_mode
 
-    local_app.switch_page("app_pages/goals.py").run()
+    local_app.switch_page("app_pages/progress.py").run()
 
-    assert_page_and_theme(local_app, "Metas", dark_mode)
+    assert_page_and_theme(local_app, "Progresso", dark_mode)
 
 
 def test_completing_session_updates_current_week_goal_and_day_filter_keeps_it(local_app):
@@ -147,16 +181,15 @@ def test_saving_weekly_goal_updates_home_without_changing_theme(local_app, dark_
     app = local_app
     if dark_mode:
         app.button(key="toggle_plan_theme").click().run()
-    app.button(key="flow_goals").click().run()
-    assert_page_and_theme(app, "Metas", dark_mode)
-    app.switch_page("app_pages/goals.py").run()
+    app.switch_page("app_pages/progress.py").run()
+    assert_page_and_theme(app, "Progresso", dark_mode)
     app.number_input[0].set_value(12.0)
     next(button for button in app.button if button.label == "Salvar meta").click().run()
 
-    assert_page_and_theme(app, "Metas", dark_mode)
+    assert_page_and_theme(app, "Progresso", dark_mode)
     assert get_database().users.find_one()["weekly_goal_minutes"] == 720
 
-    app.button(key="flow_today").click().run()
+    app.switch_page("app_pages/overview.py").run()
 
     assert_page_and_theme(app, "Olá, Estudante local", dark_mode)
     assert app.metric[0].value.endswith("/ 720 min")
@@ -167,23 +200,23 @@ def test_evaluation_filter_updates_chart_and_summary_for_selected_subject(local_
     app = local_app
     if dark_mode:
         app.button(key="toggle_plan_theme").click().run()
-    app.switch_page("app_pages/evaluations.py").run()
+    app.switch_page("app_pages/progress.py").run()
     database = get_database()
     subject = database.subjects.find_one({"name": "Banco de Dados"})
 
-    app.selectbox(key="evaluation_subject_filter").set_value(subject["_id"]).run()
+    app.selectbox(key="progress_subject").set_value(subject["_id"]).run()
 
-    assert_page_and_theme(app, "Avaliações", dark_mode)
+    assert_page_and_theme(app, "Progresso", dark_mode)
     rows = list(database.evaluations.find({"subject_id": subject["_id"]}))
     graded = [row for row in rows if row["score"] is not None]
-    assert app.metric[0].value == str(len(rows))
-    assert app.metric[1].value == str(len(graded))
-    chart = json.loads(app.get("plotly_chart")[0].proto.spec)
+    assert metric_value(app, "Avaliações") == str(len(rows))
+    assert metric_value(app, "Com nota") == str(len(graded))
+    chart = json.loads(grade_chart(app).proto.spec)
     assert len(chart["data"]) == 1
     assert chart["data"][0]["name"] == subject["name"]
     assert len(chart["data"][0]["x"]) == len(graded)
 
-    app.selectbox(key="evaluation_subject_filter").set_value(None).run()
+    app.selectbox(key="progress_subject").set_value(None).run()
 
-    assert_page_and_theme(app, "Avaliações", dark_mode)
-    assert app.metric[0].value == str(database.evaluations.count_documents({}))
+    assert_page_and_theme(app, "Progresso", dark_mode)
+    assert metric_value(app, "Avaliações") == str(database.evaluations.count_documents({}))

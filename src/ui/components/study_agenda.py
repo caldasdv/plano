@@ -30,6 +30,13 @@ _AGENDA = st.components.v2.component(
     .session strong, .session span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .session strong { color: #06457f; font: 700 .82rem var(--st-font); }
     .session span { margin-top: .15rem; font: .72rem var(--st-font); line-height: 1.2; }
+    .class-block { position: absolute; top: calc(var(--session-top) * 1px); left: 0; width: 100%; height: max(36px, calc(var(--session-height) * 1px)); margin: 0; padding: .35rem .55rem; overflow: hidden; border: 1px dashed #5379ae; border-left: 4px solid var(--session-color, #5379ae); border-radius: 9px; background: rgba(168, 196, 236, .35); color: #262b40; box-sizing: border-box; }
+    .class-block strong, .class-block span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .class-block strong { color: #06457f; font: 700 .72rem var(--st-font); letter-spacing: .04em; text-transform: uppercase; }
+    .class-block span { margin-top: .1rem; font: .75rem var(--st-font); line-height: 1.2; }
+    .session { z-index: 1; }
+    .agenda.dark .class-block { border-color: #a8c4ec; background: rgba(83, 121, 174, .35); color: #f4f7fb; }
+    .agenda.dark .class-block strong { color: #a8c4ec; }
     .agenda.dark .day { border-color: #5379ae; background: #1a243e; }
     .agenda.dark .day h3 { color: #a8c4ec; }
     .agenda.dark .day-body { background: repeating-linear-gradient(to bottom, transparent 0, transparent 29px, #5379ae 30px); }
@@ -54,12 +61,27 @@ _AGENDA = st.components.v2.component(
         section.appendChild(heading)
         const body = document.createElement("div")
         body.className = "day-body"
-        const latestEnd = Math.max(720, ...(day.sessions ?? []).map((session) => {
+        const latestEnd = Math.max(720, ...[...(day.sessions ?? []), ...(day.classes ?? [])].map((session) => {
           const start = Number(session.start_minute) - 360
           return start + Number(session.duration)
         }))
         body.style.minHeight = `${latestEnd + 24}px`
-        if (!day.sessions.length) {
+        for (const meeting of (day.classes ?? [])) {
+          const block = document.createElement("div")
+          block.className = "class-block"
+          if (meeting.color) block.style.setProperty("--session-color", meeting.color)
+          block.style.setProperty("--session-top", Math.max(0, meeting.start_minute - 360))
+          block.style.setProperty("--session-height", Math.max(36, Number(meeting.duration)))
+          block.setAttribute("role", "note")
+          block.setAttribute("aria-label", `Aula de ${meeting.subject}, ${meeting.time} a ${meeting.end}`)
+          const label = document.createElement("strong")
+          label.textContent = `Aula · ${meeting.time}`
+          const subject = document.createElement("span")
+          subject.textContent = meeting.location ? `${meeting.subject} · ${meeting.location}` : meeting.subject
+          block.append(label, subject)
+          body.appendChild(block)
+        }
+        if (!day.sessions.length && !(day.classes ?? []).length) {
           const empty = document.createElement("p")
           empty.className = "empty"
           empty.textContent = "Sem sessões"
@@ -89,8 +111,21 @@ _AGENDA = st.components.v2.component(
 )
 
 
+def _safe_color(value: Any, fallback: str) -> str:
+    return value if isinstance(value, str) and re.fullmatch(r"#[0-9A-Fa-f]{6}", value) else fallback
+
+
+def _minutes(value: str) -> int:
+    return int(value[:2]) * 60 + int(value[3:5])
+
+
 def render_study_agenda(
-    sessions: Iterable[dict[str, Any]], week_start: date, *, key: str, dark_mode: bool = False
+    sessions: Iterable[dict[str, Any]],
+    week_start: date,
+    *,
+    key: str,
+    dark_mode: bool = False,
+    class_meetings: Iterable[dict[str, Any]] = (),
 ) -> str | None:
     """Renderiza a agenda e retorna o ID selecionado nesta execução."""
     sessions_by_date: dict[str, list[dict[str, Any]]] = {}
@@ -109,6 +144,20 @@ def render_study_agenda(
                 else "#0474C4",
             }
         )
+    classes_by_weekday: dict[int, list[dict[str, Any]]] = {}
+    for meeting in class_meetings:
+        start = _minutes(str(meeting["start_time"]))
+        classes_by_weekday.setdefault(int(meeting["weekday"]), []).append(
+            {
+                "time": str(meeting["start_time"]),
+                "end": str(meeting["end_time"]),
+                "subject": str(meeting.get("subject_name", "Aula")),
+                "location": str(meeting.get("location") or ""),
+                "start_minute": start,
+                "duration": max(_minutes(str(meeting["end_time"])) - start, 0),
+                "color": _safe_color(meeting.get("subject_color"), "#5379AE"),
+            }
+        )
     weekdays = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"]
     days = [
         {
@@ -116,6 +165,7 @@ def render_study_agenda(
             "date": (week_start + timedelta(days=offset)).isoformat(),
             "is_today": week_start + timedelta(days=offset) == date.today(),
             "sessions": sessions_by_date.get((week_start + timedelta(days=offset)).isoformat(), []),
+            "classes": classes_by_weekday.get(offset, []),
         }
         for offset, weekday in enumerate(weekdays)
     ]
