@@ -7,7 +7,9 @@ import streamlit as st
 from src.domain.session_rules import effective_status
 from src.ui.components.session_card import render_session_card
 from src.ui.components.study_rhythm import render_study_rhythm
-from src.ui.components.page_header import render_flow_actions, render_page_header
+from src.ui.components.page_header import render_page_header
+from src.ui.components.session_dialog import open_session_dialog
+from src.ui.navigation import PERIODS, PROGRESS, SUBJECTS
 from src.ui.context import load_current_period_subjects, load_page_context, load_page_sessions
 from src.ui.feedback import set_success_flash, show_action_error
 from src.ui.sidebar import render_account_sidebar
@@ -21,14 +23,13 @@ render_page_header(
     f"Olá, {user['name']}",
     "Aqui está o que você planejou para os próximos dias.",
 )
-render_flow_actions("Hoje")
 
 if user.get("current_academic_period_id") is None:
     with st.container(border=True):
         st.subheader("Vamos preparar seu plano")
         st.write("Crie um período acadêmico para depois adicionar disciplinas e sessões de estudo.")
-        if st.button("Criar período acadêmico", type="primary", icon=":material/date_range:"):
-            st.switch_page("app_pages/academic_periods.py")
+        if st.button("Adicionar período acadêmico", type="primary", icon=PERIODS.icon):
+            st.switch_page(PERIODS.path)
     st.stop()
 
 current_subjects = load_current_period_subjects(
@@ -38,11 +39,10 @@ if not current_subjects:
     with st.container(border=True):
         st.subheader("Seu período está pronto")
         st.write("Adicione sua primeira disciplina para começar a planejar sessões de estudo.")
-        if st.button("Adicionar disciplina", type="primary", icon=":material/menu_book:"):
-            st.switch_page("app_pages/subjects.py")
+        if st.button("Adicionar disciplina", type="primary", icon=SUBJECTS.icon):
+            st.switch_page(SUBJECTS.path)
     st.stop()
 
-selected_date = st.date_input("Ver dia", value=date.today(), format="DD/MM/YYYY", key="overview_date")
 week_start = date.today() - timedelta(days=date.today().weekday())
 week_end = week_start + timedelta(days=6)
 week_sessions = load_page_sessions(
@@ -91,25 +91,13 @@ with st.container(border=True, key="overview_weekly_goal"):
     goal_heading.caption("Seu ritmo de estudo em relação ao objetivo definido.")
     goal_value.metric("Progresso", f"{completed_minutes} / {goal_minutes} min")
     st.progress(goal_progress, text=f"{goal_progress * 100:.0f}% da meta semanal")
-    st.caption("Para alterar a meta, abra a seção Metas na barra lateral.")
-
-st.markdown(
-    '<section class="plan-quick-actions" aria-label="Ações rápidas">'
-    '<span>O que você quer fazer agora?</span></section>',
-    unsafe_allow_html=True,
-)
-
-quick_columns = st.columns(3)
-if quick_columns[0].button("Começar uma sessão", icon=":material/play_arrow:", width="stretch", key="overview_quick_session"):
-    st.switch_page("app_pages/new_session.py")
-if quick_columns[1].button("Revisar a semana", icon=":material/calendar_view_week:", width="stretch", key="overview_quick_week"):
-    st.switch_page("app_pages/weekly.py")
-if quick_columns[2].button("Organizar conteúdos", icon=":material/account_tree:", width="stretch", key="overview_quick_topics"):
-    st.switch_page("app_pages/topics.py")
+    st.page_link(PROGRESS.path, label="Ajustar meta em Progresso", icon=":material/tune:")
 
 if not pending:
     st.success("Tudo em dia por aqui. Você pode planejar a próxima sessão.")
 st.markdown('<div class="plan-overview-divider"></div>', unsafe_allow_html=True)
+
+selected_date = st.date_input("Ver dia", value=date.today(), format="DD/MM/YYYY", key="overview_date")
 
 if week_start <= selected_date <= week_end:
     day_sessions = [session for session in week_sessions if session["study_date"] == selected_date.isoformat()]
@@ -130,6 +118,15 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+if not day_sessions:
+    st.info("Nenhuma sessão planejada para este dia.")
+    st.button(
+        "Adicionar sessão",
+        icon=":material/add:",
+        key="overview_add_session",
+        on_click=open_session_dialog,
+    )
+
 for row in day_sessions:
     action = render_session_card(row, key=f"overview_session_{row['_id']}")
     if action == "complete":
@@ -138,5 +135,5 @@ for row in day_sessions:
         except Exception as error:
             show_action_error("concluir a sessão", error)
         else:
-            set_success_flash("Sessão concluída.")
+            set_success_flash("Sessão concluída.", undo_session_id=row["_id"], user_id=user["_id"])
             st.rerun()

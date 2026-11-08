@@ -8,6 +8,7 @@ import streamlit as st
 
 from src.services.container import ApplicationServices
 from src.config.runtime import is_local_mode
+from src.ui.components.session_dialog import open_session_dialog, render_session_dialog
 from src.ui.feedback import show_action_error
 
 
@@ -22,6 +23,16 @@ def _toggle_theme(services: ApplicationServices, user: dict) -> None:
 
 
 def render_account_sidebar(services: ApplicationServices, user: dict) -> None:
+    # Ação principal do app: sempre no mesmo lugar, em qualquer tela (acesso ubíquo).
+    st.sidebar.button(
+        "Nova sessão",
+        type="primary",
+        icon=":material/add:",
+        width="stretch",
+        key="sidebar_new_session",
+        on_click=open_session_dialog,
+    )
+    st.sidebar.divider()
     st.sidebar.markdown(
         f'<div class="plan-sidebar-user"><strong>{escape(str(user["name"]))}</strong>'
         f'<span>{escape(str(user["email"]))}</span></div>',
@@ -53,3 +64,4 @@ def render_account_sidebar(services: ApplicationServices, user: dict) -> None:
             '<span class="plan-dark-mode-marker" aria-hidden="true"></span>',
             unsafe_allow_html=True,
         )
+    render_session_dialog(services, user)

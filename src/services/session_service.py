@@ -68,6 +68,10 @@ class SessionService:
     def complete(self, session_id: Any, user_id: Any) -> None:
         self.repository.mark_completed(session_id, user_id)
 
+    def reopen(self, session_id: Any, user_id: Any) -> None:
+        """Desfaz a conclusão de uma sessão, devolvendo-a para pendente."""
+        self.repository.mark_pending(session_id, user_id)
+
     def update(
         self,
         *,
