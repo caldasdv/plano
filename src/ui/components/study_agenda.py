@@ -34,7 +34,7 @@ _AGENDA = st.components.v2.component(
     .agenda.dark .day h3 { color: #a8c4ec; }
     .agenda.dark .day-body { background: repeating-linear-gradient(to bottom, transparent 0, transparent 29px, #5379ae 30px); }
     .agenda.dark .empty { color: #a8c4ec; }
-    .agenda.dark .session { border-color: #5379ae; background: #2c444c; color: #f4f7fb; }
+    .agenda.dark .session { border-color: #5379ae; background: #06457f; color: #f4f7fb; }
     .agenda.dark .session strong { color: #a8c4ec; }
     @media (max-width: 768px) { .agenda-hint { display: block; } .agenda-scroll { -webkit-overflow-scrolling: touch; } .agenda { grid-template-columns: repeat(7, minmax(155px, 1fr)); min-width: 1140px; } }
     ''',
