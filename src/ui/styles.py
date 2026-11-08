@@ -75,7 +75,7 @@ def apply_styles() -> None:
         [data-testid="stVerticalBlockBorderWrapper"] { background: var(--plan-surface); border-color: var(--plan-border); border-radius: 18px; box-shadow: var(--plan-shadow); }
         [data-testid="stForm"] { background: var(--plan-surface); border: 1px solid var(--plan-border); border-radius: 20px; box-shadow: var(--plan-shadow); padding: 1rem 1.15rem 1.15rem; }
         [data-baseweb="input"], [data-baseweb="textarea"], [data-baseweb="select"] > div { background: var(--plan-input); border-color: var(--plan-border); border-radius: 10px; transition: border-color .15s ease, box-shadow .15s ease; }
-        [data-baseweb="input"]:focus-within, [data-baseweb="textarea"]:focus-within, [data-baseweb="select"] > div:focus-within { border-color: var(--plan-accent); box-shadow: 0 0 0 3px rgba(4, 116, 196, .18); }
+        [data-testid="stTextInputRootElement"]:focus-within, [data-testid="stTextAreaRootElement"]:focus-within, [data-testid="stNumberInputContainer"]:focus-within, [data-baseweb="input"]:focus-within, [data-baseweb="textarea"]:focus-within, [data-baseweb="select"] > div:focus-within { border-color: var(--plan-accent); box-shadow: 0 0 0 3px rgba(4, 116, 196, .18); }
         [data-testid="stWidgetLabel"] p { color: var(--plan-text); font-size: .82rem; font-weight: 650; }
         [data-testid="stExpander"] { background: var(--plan-surface); border: 1px solid var(--plan-border); border-radius: 16px; }
         [data-testid="stExpander"] summary:hover { background: var(--plan-input); }
@@ -270,7 +270,7 @@ def apply_styles() -> None:
         .stButton button[kind="primary"]:hover, .stFormSubmitButton button[kind="primary"]:hover { background: #06457f; border-color: #06457f; color: #ffffff; }
         [data-testid="stSidebar"] [data-testid="stButton"] button:not([kind="primary"]) { background: #06457f; border-color: #a8c4ec; color: #ffffff; -webkit-text-fill-color: #ffffff; }
         [data-testid="stSidebar"] [data-testid="stButton"] button:not([kind="primary"]):is(:hover, :focus-visible, :active) { background: #0474c4; border-color: #a8c4ec; color: #ffffff; }
-        [data-testid="stDateInputField"], [data-baseweb="input"], [data-baseweb="textarea"], [data-baseweb="select"] > div { background: var(--plan-input); border-color: var(--plan-border); color: var(--plan-text); }
+        [data-testid="stDateInputField"], [data-testid="stTextInputRootElement"], [data-testid="stTextAreaRootElement"], [data-testid="stNumberInputContainer"], [data-baseweb="input"], [data-baseweb="textarea"], [data-baseweb="select"] > div { background: var(--plan-input); border-color: var(--plan-border); color: var(--plan-text); }
         [data-testid="stSelectbox"] [role="group"] { background: var(--plan-input); border-color: var(--plan-border); color: var(--plan-text); }
         [data-testid="stSelectbox"] [role="group"]:focus-within { border-color: var(--plan-accent); }
         [data-testid="stSelectbox"] [role="group"] button { color: var(--plan-text); }
