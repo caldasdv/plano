@@ -26,12 +26,13 @@ def _auth_is_configured() -> bool:
 
 def require_login() -> None:
     """Interrompe a execução até que o usuário conclua o login."""
-    if is_local_mode():
+    local_mode = is_local_mode()
+    if local_mode and st.session_state.get("plan_local_authenticated", False):
         return
-    if st.user.get("is_logged_in", False):
+    if not local_mode and st.user.get("is_logged_in", False):
         return
 
-    auth_configured = _auth_is_configured()
+    auth_configured = local_mode or _auth_is_configured()
     left, right = st.columns([1.05, 0.95], gap="large", vertical_alignment="center")
     with left:
         st.markdown(
@@ -67,6 +68,31 @@ def require_login() -> None:
             """,
             unsafe_allow_html=True,
         )
+    if local_mode:
+        with left:
+            st.markdown(
+                '<div class="plan-login-action-label">Conheça seu plano de estudos</div>',
+                unsafe_allow_html=True,
+            )
+            st.caption("Escolha entrar com dados de exemplo ou começar com um plano vazio. Nenhuma conta é necessária.")
+            if st.button(
+                "Entrar na demonstração",
+                type="primary",
+                width="stretch",
+                key="local_demo_login",
+            ):
+                st.session_state["plan_local_profile"] = "demo"
+                st.session_state["plan_local_authenticated"] = True
+                st.rerun()
+            if st.button(
+                "Começar com plano vazio",
+                width="stretch",
+                key="local_empty_login",
+            ):
+                st.session_state["plan_local_profile"] = "empty"
+                st.session_state["plan_local_authenticated"] = True
+                st.rerun()
+        st.stop()
     if not auth_configured:
         st.warning("O login ainda não está configurado neste ambiente.")
         st.caption(
@@ -83,6 +109,13 @@ def require_login() -> None:
 def get_current_identity() -> dict[str, str]:
     """Converte os claims necessários do OIDC em uma estrutura estável."""
     if is_local_mode():
+        if st.session_state.get("plan_local_profile") == "empty":
+            return {
+                "provider": "local-demo",
+                "subject": "local-empty-user",
+                "name": "Sofia",
+                "email": "novo@plano.test",
+            }
         return {
             "provider": "local-demo",
             "subject": "local-demo-user",

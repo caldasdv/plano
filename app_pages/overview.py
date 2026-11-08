@@ -8,7 +8,8 @@ from src.domain.session_rules import effective_status
 from src.ui.components.session_card import render_session_card
 from src.ui.components.study_rhythm import render_study_rhythm
 from src.ui.components.page_header import render_flow_actions, render_page_header
-from src.ui.context import load_page_context, load_page_sessions
+from src.ui.context import load_current_period_subjects, load_page_context, load_page_sessions
+from src.ui.feedback import set_success_flash, show_action_error
 from src.ui.sidebar import render_account_sidebar
 
 
@@ -22,9 +23,28 @@ render_page_header(
 )
 render_flow_actions("Hoje")
 
+if user.get("current_academic_period_id") is None:
+    with st.container(border=True):
+        st.subheader("Vamos preparar seu plano")
+        st.write("Crie um período acadêmico para depois adicionar disciplinas e sessões de estudo.")
+        if st.button("Criar período acadêmico", type="primary", icon=":material/date_range:"):
+            st.switch_page("app_pages/academic_periods.py")
+    st.stop()
+
+current_subjects = load_current_period_subjects(
+    services, user, retry_key="retry_overview_subjects"
+)
+if not current_subjects:
+    with st.container(border=True):
+        st.subheader("Seu período está pronto")
+        st.write("Adicione sua primeira disciplina para começar a planejar sessões de estudo.")
+        if st.button("Adicionar disciplina", type="primary", icon=":material/menu_book:"):
+            st.switch_page("app_pages/subjects.py")
+    st.stop()
+
+selected_date = st.date_input("Ver dia", value=date.today(), format="DD/MM/YYYY", key="overview_date")
 week_start = date.today() - timedelta(days=date.today().weekday())
 week_end = week_start + timedelta(days=6)
-selected_date = st.date_input("Ver dia", value=date.today(), format="DD/MM/YYYY", key="overview_date")
 week_sessions = load_page_sessions(
     services,
     user,
@@ -65,11 +85,13 @@ st.markdown(
 render_study_rhythm(week_sessions, week_start)
 goal_progress = min(completed_minutes / goal_minutes, 1.0) if goal_minutes else 0.0
 
-with st.container(border=True):
+with st.container(border=True, key="overview_weekly_goal"):
     goal_heading, goal_value = st.columns([2, 1])
     goal_heading.markdown("#### Meta da semana")
+    goal_heading.caption("Seu ritmo de estudo em relação ao objetivo definido.")
     goal_value.metric("Progresso", f"{completed_minutes} / {goal_minutes} min")
     st.progress(goal_progress, text=f"{goal_progress * 100:.0f}% da meta semanal")
+    st.caption("Para alterar a meta, abra a seção Metas na barra lateral.")
 
 st.markdown(
     '<section class="plan-quick-actions" aria-label="Ações rápidas">'
@@ -78,14 +100,28 @@ st.markdown(
 )
 
 quick_columns = st.columns(3)
-quick_columns[0].button("Começar uma sessão", icon=":material/play_arrow:", width="stretch", key="overview_quick_session")
-quick_columns[1].button("Revisar a semana", icon=":material/calendar_view_week:", width="stretch", key="overview_quick_week")
-quick_columns[2].button("Organizar conteúdos", icon=":material/account_tree:", width="stretch", key="overview_quick_topics")
+if quick_columns[0].button("Começar uma sessão", icon=":material/play_arrow:", width="stretch", key="overview_quick_session"):
+    st.switch_page("app_pages/new_session.py")
+if quick_columns[1].button("Revisar a semana", icon=":material/calendar_view_week:", width="stretch", key="overview_quick_week"):
+    st.switch_page("app_pages/weekly.py")
+if quick_columns[2].button("Organizar conteúdos", icon=":material/account_tree:", width="stretch", key="overview_quick_topics"):
+    st.switch_page("app_pages/topics.py")
 
-st.success("Tudo em dia por aqui. Você pode planejar a próxima sessão.")
+if not pending:
+    st.success("Tudo em dia por aqui. Você pode planejar a próxima sessão.")
 st.markdown('<div class="plan-overview-divider"></div>', unsafe_allow_html=True)
 
-day_sessions = [session for session in week_sessions if session["study_date"] == selected_date.isoformat()]
+if week_start <= selected_date <= week_end:
+    day_sessions = [session for session in week_sessions if session["study_date"] == selected_date.isoformat()]
+else:
+    day_sessions = load_page_sessions(
+        services,
+        user,
+        subjects,
+        start_date=selected_date,
+        end_date=selected_date,
+        retry_key="retry_overview_day",
+    )
 weekdays = ["segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira", "sábado", "domingo"]
 
 st.markdown(
@@ -95,4 +131,12 @@ st.markdown(
 )
 
 for row in day_sessions:
-    render_session_card(row, key=f"overview_session_{row['_id']}")
+    action = render_session_card(row, key=f"overview_session_{row['_id']}")
+    if action == "complete":
+        try:
+            services.sessions.complete(row["_id"], user["_id"])
+        except Exception as error:
+            show_action_error("concluir a sessão", error)
+        else:
+            set_success_flash("Sessão concluída.")
+            st.rerun()
