@@ -33,7 +33,7 @@ _TIMETABLE = st.components.v2.component(
     .timetable.dark .day { border-color: #5379ae; background: #1a243e; }
     .timetable.dark .day h3 { color: #a8c4ec; }
     .timetable.dark .empty { color: #a8c4ec; }
-    .timetable.dark .meeting { border-color: #5379ae; background: #06457f; color: #f4f7fb; }
+    .timetable.dark .meeting { border-color: #5379ae; border-left-color: var(--meeting-color, #0474c4); background: #06457f; color: #f4f7fb; }
     .timetable.dark .meeting-location { color: #a8c4ec !important; }
     .timetable.dark .meeting.selected { background: #0474c4; }
     @media (max-width: 640px) and (hover: none) { .timetable-hint { display: block; } .timetable-scroll { -webkit-overflow-scrolling: touch; } .timetable { grid-template-columns: repeat(7, minmax(130px, 1fr)); min-width: 950px; } }

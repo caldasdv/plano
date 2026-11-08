@@ -305,6 +305,16 @@ def apply_styles() -> None:
         body:has(.plan-dark-mode-marker) .plan-overview-hero p { color: #a8c4ec; }
         body:has(.plan-dark-mode-marker) .plan-overview-hero-stat { background: #06457f; border-color: var(--plan-border); }
         body:has(.plan-dark-mode-marker) .plan-rhythm-done > i b { background: #a8c4ec; }
+        body:has(.plan-dark-mode-marker) [data-testid="stTable"] table { background: var(--plan-surface); border-color: var(--plan-border); color: var(--plan-text); }
+        body:has(.plan-dark-mode-marker) [data-testid="stTable"] :is(th, td) { background: var(--plan-surface); border-color: var(--plan-border); color: var(--plan-text); }
+        body:has(.plan-dark-mode-marker) [data-testid="stTable"] th { background: var(--plan-input); color: var(--plan-muted); }
+        body:has(.plan-dark-mode-marker) [data-testid="stProgressBarTrack"] { background: var(--plan-input); }
+        body:has(.plan-dark-mode-marker) [data-testid="stDateInputCalendar"] { background: var(--plan-surface); border: 1px solid var(--plan-border); color: var(--plan-text); }
+        body:has(.plan-dark-mode-marker) [data-testid="stDateInputCalendar"] :is(th, button, button *) { color: var(--plan-text); }
+        body:has(.plan-dark-mode-marker) [data-testid="stTimeInputTimeDisplay"] { background: var(--plan-input); color: var(--plan-text); }
+        body:has(.plan-dark-mode-marker) [data-testid="stExpander"] summary { background: transparent; }
+        body:has(.plan-dark-mode-marker) [data-testid="stExpander"] summary:hover { background: var(--plan-input); }
+        body:has(.plan-dark-mode-marker) [data-testid="stElementToolbarButtonContainer"] { background: var(--plan-surface); color: var(--plan-text); }
         body:has(.plan-dark-mode-marker) .plan-login-visual { background: #1a243e; border-color: var(--plan-border); }
         body:has(.plan-dark-mode-marker) .plan-login-week-card,
         body:has(.plan-dark-mode-marker) .plan-login-float { background: var(--plan-surface); border-color: var(--plan-border); }

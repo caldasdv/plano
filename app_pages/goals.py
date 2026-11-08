@@ -63,7 +63,7 @@ adaptive_plan = build_adaptive_goal_plan(
     subjects, topics_by_subject, evaluations, sessions, goal_minutes, strategy
 )
 if adaptive_plan:
-    st.dataframe(
+    st.table(
         [
             {"Disciplina": row["disciplina"], "Foco sugerido": f"{row['minutos']} min", "Por quê": row["motivo"]}
             for row in adaptive_plan

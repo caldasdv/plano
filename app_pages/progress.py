@@ -118,7 +118,7 @@ else:
             )
 
     with st.expander("Ver dados da semana em tabela"):
-        st.dataframe(
+        st.table(
             [
                 {
                     "Dia": row["dia"],
@@ -138,7 +138,7 @@ evaluation_summary = build_evaluation_summary(evaluations, filtered_subjects)
 if not evaluation_summary:
     st.info("Registre provas, trabalhos ou exercícios para visualizar sua análise de notas.")
 else:
-    st.dataframe(
+    st.table(
         [
             {
                 "Disciplina": row["disciplina"],
