@@ -8,6 +8,7 @@ import streamlit as st
 
 from src.services.container import ApplicationServices
 from src.config.runtime import is_local_mode
+from src.ui.components.session_dialog import render_session_dialog
 from src.ui.feedback import show_action_error
 
 
@@ -53,3 +54,4 @@ def render_account_sidebar(services: ApplicationServices, user: dict) -> None:
             '<span class="plan-dark-mode-marker" aria-hidden="true"></span>',
             unsafe_allow_html=True,
         )
+    render_session_dialog(services, user)

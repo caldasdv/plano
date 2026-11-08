@@ -83,9 +83,9 @@ st.write("Seu plano")
     app.button[0].click().run()
     assert not app.exception
     assert user["is_logged_in"]
-    assert app.sidebar.button[0].label == "Sair"
+    logout = next(button for button in app.sidebar.button if button.label == "Sair")
 
-    app.sidebar.button[0].click().run()
+    logout.click().run()
     assert not app.exception
     assert not user["is_logged_in"]
 

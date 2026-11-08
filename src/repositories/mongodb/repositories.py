@@ -376,6 +376,13 @@ class MongoStudySessionRepository:
         if result.matched_count == 0:
             raise EntityNotFoundError("A sessão não foi encontrada ou não está mais disponível.")
 
+    def mark_pending(self, session_id: Any, user_id: Any) -> None:
+        result = self.collection.update_one(
+            {"_id": session_id, "user_id": user_id}, {"$set": {"status": "Pendente"}}
+        )
+        if result.matched_count == 0:
+            raise EntityNotFoundError("A sessão não foi encontrada ou não está mais disponível.")
+
     def delete(self, session_id: Any, user_id: Any) -> None:
         result = self.collection.delete_one({"_id": session_id, "user_id": user_id})
         if result.deleted_count == 0:
