@@ -237,7 +237,7 @@ def apply_styles() -> None:
         .plan-dark-mode-marker { display: none; }
         body:has(.plan-dark-mode-marker), .stApp:has(.plan-dark-mode-marker) {
             --plan-bg: #262b40;
-            --plan-surface: #2c444c;
+            --plan-surface: #06457f;
             --plan-input: #1a243e;
             --plan-text: #ffffff;
             --plan-muted: #a8c4ec;

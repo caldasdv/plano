@@ -21,7 +21,7 @@ DARK_COLORS = {
     "muted": "#a8c4ec",
     "accent": "#a8c4ec",
     "soft": "#5379ae",
-    "surface": "#2c444c",
+    "surface": "#06457f",
     "grid": "rgba(168, 196, 236, .22)",
 }
 
