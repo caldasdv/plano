@@ -20,7 +20,8 @@ def render_session_card(row: dict, *, key: str) -> str | None:
             safe_subject_name = escape(str(row["subject_name"]))
             subject_markup = (
                 f'<span class="subject-dot" style="background:{subject_color}" '
-                f'aria-label="Cor da disciplina {subject_color}"></span>{safe_subject_name}'
+                'aria-hidden="true"></span>'
+                f'{safe_subject_name}'
             )
         else:
             subject_markup = escape(str(row["subject_name"]))

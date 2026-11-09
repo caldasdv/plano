@@ -8,6 +8,7 @@ import streamlit as st
 
 from src.domain.evaluation_rules import EVALUATION_TYPES
 from src.services.container import ApplicationServices
+from src.ui.components.chart_summaries import describe_grades
 from src.ui.components.progress_charts import evaluation_progress_figure
 from src.ui.feedback import set_success_flash, show_action_error
 
@@ -97,6 +98,7 @@ def render_grades_section(
         return
     if graded:
         st.subheader("Evolução das notas")
+        st.caption(describe_grades(graded))
         st.caption("Notas proporcionais de 0 a 10. Avaliações sem nota ficam fora do gráfico.")
         st.plotly_chart(
             evaluation_progress_figure(graded, dark_mode=bool(user.get("dark_mode", False))),

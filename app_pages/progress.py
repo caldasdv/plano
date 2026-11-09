@@ -6,6 +6,7 @@ import streamlit as st
 
 from src.services.report_service import build_subject_summary, build_week_summary
 from src.ui.components.page_header import render_page_header
+from src.ui.components.chart_summaries import describe_subject_load, describe_week_rhythm
 from src.ui.components.progress_charts import subject_progress_figure, weekly_progress_figure
 from src.ui.components.progress_summary import render_subject_progress_summary
 from src.ui.context import load_current_period_subjects, load_page_context, load_page_sessions
@@ -94,7 +95,7 @@ else:
     with chart_col:
         with st.container(border=True):
             st.subheader("Carga por disciplina")
-            st.caption("Minutos planejados e concluídos. Passe o cursor para ver os valores.")
+            st.caption(describe_subject_load(subject_summary))
             st.plotly_chart(
                 subject_progress_figure(
                     subject_summary, dark_mode=bool(user.get("dark_mode", False))
@@ -105,7 +106,7 @@ else:
     with table_col:
         with st.container(border=True):
             st.subheader("Ritmo ao longo da semana")
-            st.caption("Compare a carga planejada com o que foi concluído em cada dia.")
+            st.caption(describe_week_rhythm(week_summary))
             st.plotly_chart(
                 weekly_progress_figure(
                     week_summary, dark_mode=bool(user.get("dark_mode", False))

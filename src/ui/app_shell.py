@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from src.ui.auth import require_login
 from src.ui.styles import apply_styles
 from src.ui.feedback import render_flash
-from src.ui.navigation import MAIN_PLACES, SETTINGS, TODAY
+from src.ui.navigation import MAIN_PLACES, TODAY
 
 
 PROJECT_DIR = Path(__file__).resolve().parents[2]
@@ -31,15 +31,10 @@ def run_app() -> None:
 
     render_flash()
     page = st.navigation(
-        {
-            "": [
-                st.Page(place.path, title=place.title, icon=place.icon, default=place is TODAY)
-                for place in MAIN_PLACES
-            ],
-            "Ajustes": [
-                st.Page(item.path, title=item.title, icon=item.icon) for item in SETTINGS
-            ],
-        },
+        [
+            st.Page(place.path, title=place.title, icon=place.icon, default=place is TODAY)
+            for place in MAIN_PLACES
+        ],
         position="sidebar",
     )
     page.run()
