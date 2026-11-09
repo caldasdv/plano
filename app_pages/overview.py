@@ -9,8 +9,8 @@ from src.ui.components.session_card import render_session_card
 from src.ui.components.study_rhythm import render_study_rhythm
 from src.ui.components.page_header import render_page_header
 from src.ui.components.session_dialog import render_new_session_button
-from src.ui.navigation import PROGRESS, SUBJECTS
-from src.ui.sections.periods import open_periods_dialog
+from src.ui.navigation import PROGRESS
+from src.ui.onboarding import render_first_steps
 from src.ui.context import load_current_period_subjects, load_page_context, load_page_sessions
 from src.ui.feedback import set_success_flash, show_action_error
 from src.ui.sidebar import render_account_sidebar
@@ -25,31 +25,18 @@ render_page_header(
     "Aqui está o que você planejou para os próximos dias.",
 )
 
-if user.get("current_academic_period_id") is None:
-    with st.container(border=True):
-        st.subheader("Vamos preparar seu plano")
-        st.write("Crie um período acadêmico para depois adicionar disciplinas e sessões de estudo.")
-        st.button(
-            "Adicionar período acadêmico",
-            type="primary",
-            icon=":material/date_range:",
-            key="overview_add_period",
-            on_click=open_periods_dialog,
-        )
-    st.stop()
-
-current_subjects = load_current_period_subjects(
-    services, user, retry_key="retry_overview_subjects"
+current_subjects = (
+    load_current_period_subjects(services, user, retry_key="retry_overview_subjects")
+    if user.get("current_academic_period_id") is not None
+    else []
 )
+if current_subjects:
+    render_new_session_button("overview_new_session")
+render_first_steps(services, user, current_subjects)
 if not current_subjects:
-    with st.container(border=True):
-        st.subheader("Seu período está pronto")
-        st.write("Adicione sua primeira disciplina para começar a planejar sessões de estudo.")
-        if st.button("Adicionar disciplina", type="primary", icon=SUBJECTS.icon):
-            st.switch_page(SUBJECTS.path)
+    # Sem período ou sem disciplinas não há o que planejar: o checklist acima
+    # mostra o único próximo passo.
     st.stop()
-
-render_new_session_button("overview_new_session")
 
 week_start = date.today() - timedelta(days=date.today().weekday())
 week_end = week_start + timedelta(days=6)

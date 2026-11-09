@@ -26,3 +26,7 @@ class UserService:
         if not isinstance(enabled, bool):
             raise ValueError("A preferência de modo escuro deve ser booleana.")
         self.repository.update_dark_mode(user_id, enabled)
+
+    def complete_onboarding(self, user_id: Any) -> None:
+        """Registra que o usuário viu ou pulou o tour de boas-vindas."""
+        self.repository.mark_onboarding_completed(user_id)

@@ -8,6 +8,7 @@ from typing import Any
 import streamlit as st
 
 from src.services.container import ApplicationServices
+from src.ui.dialog_state import SESSION_DIALOG, active_dialog, close_dialog, open_dialog
 from src.ui.feedback import set_success_flash, show_action_error
 from src.ui.navigation import SUBJECTS
 
@@ -149,16 +150,13 @@ def _session_form(
         st.rerun()
 
 
-_DIALOG_STATE_KEY = "plan_session_dialog"
-
-
 def open_session_dialog(session: dict | None = None) -> None:
     """Abre o diálogo de criar (sem ``session``) ou editar sessão.
 
     O estado fica na sessão do Streamlit para o diálogo continuar aberto entre
     reruns e fechar só quando o usuário salva ou dispensa.
     """
-    st.session_state[_DIALOG_STATE_KEY] = {"session": session}
+    open_dialog(SESSION_DIALOG, {"session": session})
 
 
 def render_new_session_button(key: str) -> None:
@@ -175,7 +173,7 @@ def render_new_session_button(key: str) -> None:
 
 
 def close_session_dialog() -> None:
-    st.session_state.pop(_DIALOG_STATE_KEY, None)
+    close_dialog(SESSION_DIALOG)
 
 
 @st.dialog("Nova sessão", width="medium", on_dismiss=close_session_dialog)
@@ -191,9 +189,9 @@ def _edit_session_dialog(services: ApplicationServices, user: dict, session: dic
 
 def render_session_dialog(services: ApplicationServices, user: dict) -> None:
     """Mostra o diálogo pedido, se houver. Chamado uma vez por execução, na sidebar."""
-    state = st.session_state.get(_DIALOG_STATE_KEY)
-    if state is None:
+    if active_dialog() != SESSION_DIALOG:
         return
+    state = st.session_state[SESSION_DIALOG]
     if state["session"] is None:
         _new_session_dialog(services, user)
     else:

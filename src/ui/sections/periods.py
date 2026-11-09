@@ -8,18 +8,16 @@ from html import escape
 import streamlit as st
 
 from src.services.container import ApplicationServices
+from src.ui.dialog_state import PERIODS_DIALOG, active_dialog, close_dialog, open_dialog
 from src.ui.feedback import set_success_flash, show_action_error
 
 
-_DIALOG_STATE_KEY = "plan_periods_dialog"
-
-
 def open_periods_dialog() -> None:
-    st.session_state[_DIALOG_STATE_KEY] = True
+    open_dialog(PERIODS_DIALOG)
 
 
 def close_periods_dialog() -> None:
-    st.session_state.pop(_DIALOG_STATE_KEY, None)
+    close_dialog(PERIODS_DIALOG)
 
 
 def _date_range(period: dict) -> str:
@@ -162,7 +160,7 @@ def _periods_dialog(services: ApplicationServices, user: dict) -> None:
 
 
 def render_periods_dialog(services: ApplicationServices, user: dict) -> None:
-    if st.session_state.get(_DIALOG_STATE_KEY):
+    if active_dialog() == PERIODS_DIALOG:
         _periods_dialog(services, user)
 
 

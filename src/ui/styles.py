@@ -283,6 +283,8 @@ def apply_styles() -> None:
         body:has(.plan-dark-mode-marker) h2,
         body:has(.plan-dark-mode-marker) h3,
         body:has(.plan-dark-mode-marker) [data-testid="stMarkdownContainer"] p,
+        body:has(.plan-dark-mode-marker) [data-testid="stMarkdownContainer"] li,
+        body:has(.plan-dark-mode-marker) [data-testid="stMarkdownContainer"] strong,
         body:has(.plan-dark-mode-marker) [data-testid="stWidgetLabel"] p,
         body:has(.plan-dark-mode-marker) [data-testid="stExpander"] summary { color: var(--plan-text); }
         body:has(.plan-dark-mode-marker) [data-testid="stCaptionContainer"] p,

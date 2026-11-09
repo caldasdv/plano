@@ -113,7 +113,8 @@ def test_empty_login_keeps_sample_data_in_a_separate_account(monkeypatch):
         app = AppTest.from_file(str(APP_PATH), default_timeout=15).run()
         app.button(key="local_empty_login").click().run()
         assert not app.exception
-        assert any(header.value == "Vamos preparar seu plano" for header in app.subheader)
+        assert any(header.value == "Primeiros passos" for header in app.subheader)
+        assert app.button(key="overview_add_period")
         database = connection.get_database()
         empty_user = database.users.find_one({"identity.subject": "local-empty-user"})
         demo_user = database.users.find_one({"identity.subject": "local-demo-user"})
@@ -143,6 +144,27 @@ def test_new_user_adds_first_period_from_home(monkeypatch):
         app.text_input[0].input("2026.2")
         next(button for button in app.button if button.label == "Adicionar período").click().run()
         assert not app.exception
-        assert any(header.value == "Seu período está pronto" for header in app.subheader)
+        assert app.button(key="overview_next_step").label == "Adicionar disciplina"
+        assert any("1 de 6" in item.value for item in app.markdown)
+    finally:
+        connection.get_database.clear()
+
+
+def test_new_user_tour_ends_by_adding_first_period(monkeypatch):
+    monkeypatch.setenv("PLANO_LOCAL_MODE", "true")
+    connection.get_database.clear()
+    try:
+        app = AppTest.from_file(str(APP_PATH), default_timeout=15).run()
+        app.button(key="local_empty_login").click().run()
+        for _ in range(4):
+            app.button(key="tour_next").click().run()
+        finish = app.button(key="tour_finish")
+        assert finish.label == "Adicionar período"
+        finish.click().run()
+        assert not app.exception
+        assert "plan_tour_dialog" not in app.session_state
+        assert app.session_state["plan_periods_dialog"] is True
+        user = connection.get_database().users.find_one({"identity.subject": "local-empty-user"})
+        assert user.get("onboarding_completed_at")
     finally:
         connection.get_database.clear()

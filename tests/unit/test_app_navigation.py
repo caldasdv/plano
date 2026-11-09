@@ -234,3 +234,51 @@ def test_period_is_managed_from_subjects_and_shown_in_sidebar(local_app):
     assert not app.exception
     assert database.academic_periods.find_one({"name": "2027.1"})
     assert "plan_periods_dialog" not in app.session_state
+
+
+def test_tour_opens_on_first_access_and_skip_is_saved(local_app):
+    app = local_app
+    assert app.session_state["plan_tour_dialog"] == 0
+    assert any(item.value == "Passo 1 de 5" for item in app.caption)
+
+    app.button(key="tour_next").click().run()
+    assert app.session_state["plan_tour_dialog"] == 1
+    assert any(item.value == "Passo 2 de 5" for item in app.caption)
+    app.button(key="tour_back").click().run()
+    assert app.session_state["plan_tour_dialog"] == 0
+
+    app.button(key="tour_skip").click().run()
+    assert not app.exception
+    assert "plan_tour_dialog" not in app.session_state
+    assert get_database().users.find_one().get("onboarding_completed_at")
+
+    # Uma nova sessão do navegador não abre o tour de novo.
+    fresh = AppTest.from_file(str(APP_PATH), default_timeout=20).run()
+    fresh.button(key="local_demo_login").click().run()
+    assert not fresh.exception
+    assert "plan_tour_dialog" not in fresh.session_state
+
+
+def test_tour_finishes_on_last_step_and_reopens_from_help(local_app):
+    app = local_app
+    for _ in range(4):
+        app.button(key="tour_next").click().run()
+    assert any(item.value == "Passo 5 de 5" for item in app.caption)
+    app.button(key="tour_finish").click().run()
+    assert "plan_tour_dialog" not in app.session_state
+    assert get_database().users.find_one().get("onboarding_completed_at")
+
+    app.button(key="open_help").click().run()
+    assert not app.exception
+    assert app.session_state["plan_help_dialog"] is True
+    assert len(app.expander) >= 8
+    app.button(key="help_replay_tour").click().run()
+    assert "plan_help_dialog" not in app.session_state
+    assert app.session_state["plan_tour_dialog"] == 0
+
+
+def test_opening_another_dialog_closes_the_tour(local_app):
+    app = local_app
+    app.button(key="overview_new_session").click().run()
+    assert "plan_tour_dialog" not in app.session_state
+    assert "plan_session_dialog" in app.session_state
