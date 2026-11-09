@@ -269,8 +269,8 @@ def apply_styles() -> None:
         [data-testid="stSidebar"] [data-testid="stButton"] button p,
         [data-testid="stSidebar"] .plan-sidebar-user strong,
         [data-testid="stSidebar"] .plan-sidebar-user span { color: #ffffff !important; }
-        .stButton button:not([kind="primary"]), .stFormSubmitButton button:not([kind="primary"]) { background: var(--plan-surface); border-color: var(--plan-border); color: var(--plan-text); }
-        .stButton button:not([kind="primary"]):hover, .stFormSubmitButton button:not([kind="primary"]):hover { background: var(--plan-selection); border-color: var(--plan-accent); color: var(--plan-text); }
+        [data-testid="stPopoverButton"], .stButton button:not([kind="primary"]), .stFormSubmitButton button:not([kind="primary"]) { background: var(--plan-surface); border-color: var(--plan-border); color: var(--plan-text); }
+        [data-testid="stPopoverButton"]:hover, .stButton button:not([kind="primary"]):hover, .stFormSubmitButton button:not([kind="primary"]):hover { background: var(--plan-selection); border-color: var(--plan-accent); color: var(--plan-text); }
         .stButton button[kind="primary"], .stFormSubmitButton button[kind="primary"] { background: #0474c4; border-color: #0474c4; color: #ffffff; }
         .stButton button[kind="primary"]:hover, .stFormSubmitButton button[kind="primary"]:hover { background: #06457f; border-color: #06457f; color: #ffffff; }
         [data-testid="stSidebar"] [data-testid="stButton"] button:not([kind="primary"]) { background: #06457f; border-color: #a8c4ec; color: #ffffff; -webkit-text-fill-color: #ffffff; }
