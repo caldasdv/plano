@@ -24,10 +24,7 @@ PAGES = {
 @pytest.fixture
 def local_app(monkeypatch):
     monkeypatch.setenv("PLANO_LOCAL_MODE", "true")
-    components = (
-        "src.ui.components.study_agenda",
-        "src.ui.components.class_timetable",
-    )
+    components = ("src.ui.components.study_agenda",)
     # Cada AppTest tem um Runtime próprio para registrar os componentes v2.
     for name in components:
         sys.modules.pop(name, None)
@@ -271,13 +268,20 @@ def test_welcome_starts_balloons_and_help_restarts_them(local_app):
     assert app.session_state["plan_coach_run"] == 2
 
 
-def test_subject_card_leads_to_planning_a_session(local_app):
-    app = local_app
+def open_first_subject_card(app):
     app.button(key="tour_skip").click().run()
     app.switch_page("app_pages/subjects.py").run()
     assert not app.exception
-    subject_id = app.pills(key="subjects_detail").value
-    app.button(key="subjects_plan_session").click().run()
+    user = get_database().users.find_one({"identity.subject": "local-demo-user"})
+    return get_database().subjects.find_one(
+        {"user_id": user["_id"], "academic_period_id": user["current_academic_period_id"]}
+    )["_id"]
+
+
+def test_subject_card_leads_to_planning_a_session(local_app):
+    app = local_app
+    subject_id = open_first_subject_card(app)
+    app.button(key=f"subject_plan_{subject_id}").click().run()
     assert not app.exception
     assert app.session_state["plan_session_dialog"]["subject_id"] == subject_id
     assert app.selectbox(key="new_session_subject").value == subject_id
@@ -293,6 +297,34 @@ def test_subject_card_leads_to_planning_a_session(local_app):
     assert not app.exception
     assert "plan_session_dialog" not in app.session_state
     assert any("Quando estudar" in item.value for item in app.success)
+
+
+def test_subject_card_dialogs_add_topics_and_class_times(local_app):
+    app = local_app
+    subject_id = open_first_subject_card(app)
+    database = get_database()
+    topics_before = database.topics.count_documents({"subject_id": subject_id})
+    meetings_before = database.class_meetings.count_documents({"subject_id": subject_id})
+
+    app.button(key=f"subject_topics_{subject_id}").click().run()
+    assert app.session_state["plan_subject_dialog"]["view"] == "topics"
+    next(item for item in app.text_input if item.label == "Nome do conteúdo *").input(
+        "Normalização"
+    )
+    next(button for button in app.button if button.label == "Adicionar conteúdo").click().run()
+    assert not app.exception
+    assert database.topics.count_documents({"subject_id": subject_id}) == topics_before + 1
+    assert "plan_subject_dialog" in app.session_state
+
+    app.button(key=f"subject_classes_{subject_id}").click().run()
+    assert app.session_state["plan_subject_dialog"]["view"] == "classes"
+    next(item for item in app.selectbox if item.label == "Dia da semana *").set_value("Domingo")
+    next(button for button in app.button if button.label == "Adicionar aula").click().run()
+    assert not app.exception
+    assert (
+        database.class_meetings.count_documents({"subject_id": subject_id})
+        == meetings_before + 1
+    )
 
 
 def test_opening_another_dialog_closes_the_tour(local_app):

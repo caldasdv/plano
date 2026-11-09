@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import date, time
 from typing import Any
+from collections.abc import Callable
 
 import streamlit as st
 
@@ -47,6 +48,7 @@ def _session_form(
     session: dict[str, Any] | None,
     key: str,
     preset_subject_id: Any | None = None,
+    on_saved: Callable[[], None] | None = None,
 ) -> None:
     subjects = _load_subjects(services, user)
     if subjects is None or _missing_setup(user, subjects):
@@ -146,6 +148,9 @@ def _session_form(
     except Exception as error:
         show_action_error("salvar a sessão", error)
     else:
+        if on_saved is not None:
+            on_saved()
+            return
         close_session_dialog()
         if session:
             set_success_flash("Sessão atualizada.")
@@ -207,3 +212,6 @@ def render_session_dialog(services: ApplicationServices, user: dict) -> None:
         _new_session_dialog(services, user, state.get("subject_id"))
     else:
         _edit_session_dialog(services, user, state["session"])
+
+
+render_session_form = _session_form

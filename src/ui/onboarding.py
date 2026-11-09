@@ -13,9 +13,9 @@ import streamlit as st
 from src.domain.onboarding_rules import OnboardingStep, build_onboarding_steps, next_step
 from src.services.container import ApplicationServices
 from src.ui.components.coach_marks import render_coach_marks
-from src.ui.components.session_dialog import open_session_dialog
 from src.ui.dialog_state import (
     HELP_DIALOG,
+    SETUP_DIALOG,
     TOUR_DIALOG,
     active_dialog,
     close_dialog,
@@ -23,7 +23,7 @@ from src.ui.dialog_state import (
 )
 from src.ui.feedback import show_action_error
 from src.ui.navigation import PROGRESS, SUBJECTS, TODAY, WEEK
-from src.ui.sections.periods import open_periods_dialog
+from src.ui.setup_wizard import WIZARD_STEPS, open_setup_wizard, render_setup_wizard
 
 
 _AUTO_OPENED_KEY = "plan_tour_auto_opened"
@@ -36,8 +36,7 @@ WELCOME_TEXT = (
     "1. **Disciplinas**: cadastre o período, as matérias, os horários de aula e os conteúdos.\n"
     "2. **Semana** ou **Hoje**: planeje sessões de estudo com **Nova sessão**.\n"
     "3. **Hoje**: conclua as sessões quando terminar de estudar.\n"
-    "4. **Progresso**: acompanhe a meta, a carga por matéria e as notas.\n\n"
-    "Quer que a gente mostre onde fica cada coisa?"
+    "4. **Progresso**: acompanhe a meta, a carga por matéria e as notas."
 )
 
 COACH_STEPS = [
@@ -113,8 +112,8 @@ HELP_ITEMS = (
     ),
     (
         "Como cadastro conteúdos e horários de aula?",
-        "Em **Disciplinas**, escolha a disciplina na lista e use as seções de conteúdos "
-        "e de horários logo abaixo.",
+        "Em **Disciplinas**, cada matéria tem um cartão com os botões **Conteúdos** e "
+        "**Horários**. Cada um abre um pop-up para ver, adicionar e editar.",
     ),
     (
         "Por que a meta sugeriu este número?",
@@ -166,6 +165,18 @@ def _complete_tour(services: ApplicationServices, user: dict) -> None:
 @st.dialog("Bem-vindo ao Plano", width="medium", on_dismiss=_dismiss_tour)
 def _tour_dialog(services: ApplicationServices, user: dict) -> None:
     st.markdown(WELCOME_TEXT)
+    if user.get("current_academic_period_id") is None:
+        st.markdown("Comece montando seu plano agora: leva uns dois minutos.")
+        if st.button(
+            "Montar meu plano agora",
+            type="primary",
+            icon=":material/rocket_launch:",
+            width="stretch",
+            key="tour_setup",
+        ):
+            _complete_tour(services, user)
+            open_setup_wizard()
+            st.rerun()
     skip_column, start_column = st.columns(2)
     if skip_column.button("Agora não", width="stretch", key="tour_skip"):
         close_dialog(TOUR_DIALOG)
@@ -173,7 +184,6 @@ def _tour_dialog(services: ApplicationServices, user: dict) -> None:
         st.rerun()
     if start_column.button(
         "Mostrar onde fica cada coisa",
-        type="primary",
         icon=":material/tour:",
         width="stretch",
         key="tour_start",
@@ -233,6 +243,8 @@ def render_onboarding_dialogs(services: ApplicationServices, user: dict) -> None
         _tour_dialog(services, user)
     elif current == HELP_DIALOG:
         _help_dialog()
+    elif current == SETUP_DIALOG:
+        render_setup_wizard(services, user)
     elif st.session_state.get(COACH_STATE_KEY):
         with st.sidebar:
             render_coach_marks(
@@ -300,36 +312,18 @@ def render_first_steps(services: ApplicationServices, user: dict, subjects: list
                 f"{'✓' if step.done else '○'} {step.label}" for step in steps
             )
         )
-        _render_next_step_action(upcoming)
+        _render_next_step_action(upcoming, done_count)
     return True
 
 
-def _render_next_step_action(step: OnboardingStep) -> None:
-    if step.key == "period":
+def _render_next_step_action(step: OnboardingStep, done_count: int) -> None:
+    if step.key in WIZARD_STEPS:
         st.button(
-            "Adicionar período acadêmico",
+            "Montar meu plano" if done_count == 0 else f"Continuar: {step.label.lower()}",
             type="primary",
-            icon=":material/date_range:",
-            key="overview_add_period",
-            on_click=open_periods_dialog,
-        )
-    elif step.key in ("subject", "class", "topic"):
-        labels = {
-            "subject": "Adicionar disciplina",
-            "class": "Cadastrar horário de aula",
-            "topic": "Cadastrar conteúdo",
-        }
-        if st.button(
-            labels[step.key], type="primary", icon=SUBJECTS.icon, key="overview_next_step"
-        ):
-            st.switch_page(SUBJECTS.path)
-    elif step.key == "session":
-        st.button(
-            "Planejar sessão",
-            type="primary",
-            icon=":material/add:",
-            key="overview_next_step",
-            on_click=open_session_dialog,
+            icon=":material/rocket_launch:",
+            key="overview_setup",
+            on_click=open_setup_wizard,
         )
     else:
         st.caption(
@@ -337,21 +331,10 @@ def _render_next_step_action(step: OnboardingStep) -> None:
         )
 
 
-_SUBJECTS_HINTS = {
-    "subject": "Próximo passo: adicione sua primeira disciplina com **Adicionar disciplina**.",
-    "class": "Próximo passo: escolha uma disciplina e cadastre um horário em "
-    "**Horários de aula**, mais abaixo.",
-    "topic": "Próximo passo: cadastre um conteúdo que você precisa estudar em **Conteúdos**, "
-    "mais abaixo.",
-    "session": "Tudo pronto para estudar! Use **Planejar sessão** no fim do cartão da "
-    "disciplina para marcar quando vai estudar.",
-}
-
-
 def render_subjects_next_step(
     services: ApplicationServices, user: dict, subjects: list[dict]
 ) -> None:
-    """Na tela Disciplinas, diz qual é o próximo passo enquanto o plano não está pronto."""
+    """Em Disciplinas, lembra o que falta e retoma o assistente num clique."""
     if user.get("current_academic_period_id") is None:
         return
     try:
@@ -360,29 +343,24 @@ def render_subjects_next_step(
         return
     if upcoming is None:
         return
-    if upcoming.key in _SUBJECTS_HINTS:
-        st.info(_SUBJECTS_HINTS[upcoming.key], icon=":material/flag:")
-    elif upcoming.key == "complete":
-        hint_column, link_column = st.columns([3, 1], vertical_alignment="center")
+    hint_column, action_column = st.columns([3, 1], vertical_alignment="center")
+    if upcoming.key in WIZARD_STEPS:
+        hint_column.info(
+            f"Seu plano ainda não está pronto. Falta: {upcoming.label.lower()}.",
+            icon=":material/flag:",
+        )
+        action_column.button(
+            "Continuar montando",
+            type="primary",
+            icon=":material/rocket_launch:",
+            width="stretch",
+            key="subjects_setup",
+            on_click=open_setup_wizard,
+        )
+    else:
         hint_column.info(
             "Sessão planejada. Quando terminar de estudar, conclua a sessão em **Hoje**.",
             icon=":material/flag:",
         )
-        with link_column:
+        with action_column:
             st.page_link(TODAY.path, label="Ir para Hoje", icon=TODAY.icon)
-
-
-def render_plan_session_footer(subject: dict) -> None:
-    """Fecha o cartão da disciplina com o caminho natural: planejar quando estudar."""
-    st.divider()
-    text_column, button_column = st.columns([3, 1], vertical_alignment="center")
-    text_column.markdown(f"**Próximo passo:** planejar quando estudar {subject['name']}.")
-    button_column.button(
-        "Planejar sessão",
-        type="primary",
-        icon=":material/event:",
-        width="stretch",
-        key="subjects_plan_session",
-        on_click=open_session_dialog,
-        args=(None, subject["_id"]),
-    )

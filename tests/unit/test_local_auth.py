@@ -114,7 +114,7 @@ def test_empty_login_keeps_sample_data_in_a_separate_account(monkeypatch):
         app.button(key="local_empty_login").click().run()
         assert not app.exception
         assert any(header.value == "Primeiros passos" for header in app.subheader)
-        assert app.button(key="overview_add_period")
+        assert app.button(key="overview_setup").label == "Montar meu plano"
         database = connection.get_database()
         empty_user = database.users.find_one({"identity.subject": "local-empty-user"})
         demo_user = database.users.find_one({"identity.subject": "local-demo-user"})
@@ -133,38 +133,71 @@ def test_empty_login_keeps_sample_data_in_a_separate_account(monkeypatch):
         connection.get_database.clear()
 
 
-def test_new_user_adds_first_period_from_home(monkeypatch):
+def _click(app, label):
+    next(button for button in app.button if button.label == label).click().run()
+    assert not app.exception
+
+
+def _fill(app, label, value):
+    next(item for item in app.text_input if item.label == label).input(value)
+
+
+def test_new_user_builds_the_plan_in_the_setup_wizard(monkeypatch):
     monkeypatch.setenv("PLANO_LOCAL_MODE", "true")
     connection.get_database.clear()
     try:
         app = AppTest.from_file(str(APP_PATH), default_timeout=15).run()
         app.button(key="local_empty_login").click().run()
-
-        app.button(key="overview_add_period").click().run()
-        app.text_input[0].input("2026.2")
-        next(button for button in app.button if button.label == "Adicionar período").click().run()
+        app.button(key="tour_setup").click().run()
         assert not app.exception
-        assert app.button(key="overview_next_step").label == "Adicionar disciplina"
-        assert any("1 de 6" in item.value for item in app.markdown)
+        assert "plan_tour_dialog" not in app.session_state
+        assert "plan_setup_dialog" in app.session_state
+        database = connection.get_database()
+        user = database.users.find_one({"identity.subject": "local-empty-user"})
+        assert user.get("onboarding_completed_at")
+
+        assert any(item.value == "Passo 1 de 5" for item in app.caption)
+        _fill(app, "Nome *", "2026.2")
+        _click(app, "Salvar e continuar")
+        assert any(item.value == "Passo 2 de 5" for item in app.caption)
+        _fill(app, "Nome *", "Banco de Dados")
+        _click(app, "Salvar e continuar")
+        assert any(item.value == "Passo 3 de 5" for item in app.caption)
+        _click(app, "Salvar e continuar")
+        assert any(item.value == "Passo 4 de 5" for item in app.caption)
+        app.button(key="setup_skip_topic").click().run()
+        assert any(item.value == "Passo 5 de 5" for item in app.caption)
+        _fill(app, "O que você vai estudar? *", "Modelagem ER")
+        _click(app, "Adicionar sessão")
+        assert any(header.value == "Seu plano está pronto!" for header in app.subheader)
+
+        for collection in ("academic_periods", "subjects", "class_meetings", "study_sessions"):
+            assert database[collection].count_documents({"user_id": user["_id"]}) == 1
+        assert database.topics.count_documents({"user_id": user["_id"]}) == 0
+
+        app.button(key="setup_close").click().run()
+        assert "plan_setup_dialog" not in app.session_state
+        assert app.button(key="overview_setup").label.startswith("Continuar")
     finally:
         connection.get_database.clear()
 
 
-def test_new_user_is_guided_from_period_to_subjects(monkeypatch):
+def test_new_user_can_close_the_wizard_and_resume_from_subjects(monkeypatch):
     monkeypatch.setenv("PLANO_LOCAL_MODE", "true")
     connection.get_database.clear()
     try:
         app = AppTest.from_file(str(APP_PATH), default_timeout=15).run()
         app.button(key="local_empty_login").click().run()
         app.button(key="tour_skip").click().run()
-        user = connection.get_database().users.find_one({"identity.subject": "local-empty-user"})
-        assert user.get("onboarding_completed_at")
+        app.button(key="overview_setup").click().run()
+        _fill(app, "Nome *", "2026.2")
+        _click(app, "Salvar e continuar")
+        assert any(item.value == "Passo 2 de 5" for item in app.caption)
 
-        app.button(key="overview_add_period").click().run()
-        app.text_input[0].input("2026.2")
-        next(button for button in app.button if button.label == "Adicionar período").click().run()
         app.switch_page("app_pages/subjects.py").run()
         assert not app.exception
-        assert any("primeira disciplina" in item.value for item in app.info)
+        assert any("Falta: adicionar uma disciplina" in item.value for item in app.info)
+        app.button(key="subjects_setup").click().run()
+        assert any(item.value == "Passo 2 de 5" for item in app.caption)
     finally:
         connection.get_database.clear()
