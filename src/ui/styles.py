@@ -273,8 +273,11 @@ def apply_styles() -> None:
         [data-testid="stPopoverButton"]:hover, .stButton button:not([kind^="primary"]):hover, .stFormSubmitButton button:not([kind^="primary"]):hover { background: var(--plan-selection); border-color: var(--plan-accent); color: var(--plan-text); }
         .stButton button[kind^="primary"], .stFormSubmitButton button[kind^="primary"] { background: #0474c4; border-color: #0474c4; color: #ffffff; }
         .stButton button[kind^="primary"]:hover, .stFormSubmitButton button[kind^="primary"]:hover { background: #06457f; border-color: #06457f; color: #ffffff; }
-        [data-testid="stSidebar"] [data-testid="stButton"] button:not([kind^="primary"]) { background: #06457f; border-color: #a8c4ec; color: #ffffff; -webkit-text-fill-color: #ffffff; }
-        [data-testid="stSidebar"] [data-testid="stButton"] button:not([kind^="primary"]):is(:hover, :focus-visible, :active) { background: #0474c4; border-color: #a8c4ec; color: #ffffff; }
+        [data-testid="stSidebar"] [data-testid="stButton"] button:not([kind^="primary"]) { background: transparent; border-color: transparent; border-radius: 10px; color: #ffffff; font-weight: 650; justify-content: flex-start; min-height: 2.6rem; padding: .55rem .7rem .55rem 1.05rem; -webkit-text-fill-color: #ffffff; }
+        [data-testid="stSidebar"] [data-testid="stButton"] button:not([kind^="primary"]) > div { justify-content: flex-start; }
+        [data-testid="stSidebar"] [data-testid="stButton"] button:not([kind^="primary"]):is(:hover, :active) { background: rgba(168, 196, 236, .16); border-color: transparent; color: #ffffff; }
+        [data-testid="stSidebar"] [data-testid="stElementContainer"]:has(.stButton) { margin-bottom: -.6rem; }
+        [data-testid="stSidebarNavSeparator"] { display: none; }
         [data-testid="stDateInputField"], [data-testid="stTextInputRootElement"], [data-testid="stTextAreaRootElement"], [data-testid="stNumberInputContainer"], [data-baseweb="input"], [data-baseweb="textarea"], [data-baseweb="select"] > div { background: var(--plan-input); border-color: var(--plan-border); color: var(--plan-text); }
         [data-testid="stSelectbox"] [role="group"] { background: var(--plan-input); border-color: var(--plan-border); color: var(--plan-text); }
         [data-testid="stSelectbox"] [role="group"]:focus-within { border-color: var(--plan-accent); }
