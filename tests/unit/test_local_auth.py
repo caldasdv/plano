@@ -150,21 +150,21 @@ def test_new_user_adds_first_period_from_home(monkeypatch):
         connection.get_database.clear()
 
 
-def test_new_user_tour_ends_by_adding_first_period(monkeypatch):
+def test_new_user_is_guided_from_period_to_subjects(monkeypatch):
     monkeypatch.setenv("PLANO_LOCAL_MODE", "true")
     connection.get_database.clear()
     try:
         app = AppTest.from_file(str(APP_PATH), default_timeout=15).run()
         app.button(key="local_empty_login").click().run()
-        for _ in range(4):
-            app.button(key="tour_next").click().run()
-        finish = app.button(key="tour_finish")
-        assert finish.label == "Adicionar período"
-        finish.click().run()
-        assert not app.exception
-        assert "plan_tour_dialog" not in app.session_state
-        assert app.session_state["plan_periods_dialog"] is True
+        app.button(key="tour_skip").click().run()
         user = connection.get_database().users.find_one({"identity.subject": "local-empty-user"})
         assert user.get("onboarding_completed_at")
+
+        app.button(key="overview_add_period").click().run()
+        app.text_input[0].input("2026.2")
+        next(button for button in app.button if button.label == "Adicionar período").click().run()
+        app.switch_page("app_pages/subjects.py").run()
+        assert not app.exception
+        assert any("primeira disciplina" in item.value for item in app.info)
     finally:
         connection.get_database.clear()

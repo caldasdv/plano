@@ -1,7 +1,9 @@
-"""Tour de boas-vindas, ajuda e "Primeiros passos".
+"""Boas-vindas, balões de explicação, ajuda e "Primeiros passos".
 
-O tour abre sozinho no primeiro acesso, uma vez, e pode ser revisto pela Ajuda.
-Pular, terminar ou fechar o tour grava ``onboarding_completed_at`` na conta.
+No primeiro acesso aparece uma tela curta de boas-vindas. Dela o usuário segue
+para os balões, que apontam para os lugares reais da tela, ou pula. Pular,
+terminar ou fechar grava ``onboarding_completed_at`` na conta. A Ajuda reabre os
+balões a qualquer momento.
 """
 
 from __future__ import annotations
@@ -10,6 +12,7 @@ import streamlit as st
 
 from src.domain.onboarding_rules import OnboardingStep, build_onboarding_steps, next_step
 from src.services.container import ApplicationServices
+from src.ui.components.coach_marks import render_coach_marks
 from src.ui.components.session_dialog import open_session_dialog
 from src.ui.dialog_state import (
     HELP_DIALOG,
@@ -25,44 +28,61 @@ from src.ui.sections.periods import open_periods_dialog
 
 _AUTO_OPENED_KEY = "plan_tour_auto_opened"
 _PENDING_COMPLETION_KEY = "plan_tour_pending_completion"
+COACH_STATE_KEY = "plan_coach_run"
 
-TOUR_STEPS = (
-    (
-        "Bem-vindo ao Plano",
-        "O Plano ajuda você a transformar o semestre em pequenos blocos de estudo. "
-        "O caminho é sempre o mesmo:\n\n"
-        "1. **Disciplinas**: cadastre o período, as matérias, os conteúdos e as aulas.\n"
-        "2. **Semana**: planeje quando vai estudar.\n"
-        "3. **Hoje**: veja o que fazer agora e conclua as sessões.\n"
-        "4. **Progresso**: acompanhe a meta, a carga por matéria e as notas.",
-    ),
-    (
-        f"{TODAY.title}: o que fazer agora",
-        "É a tela inicial. No topo fica o botão **Nova sessão**. Abaixo aparecem a meta "
-        "da semana e as sessões do dia escolhido.\n\n"
-        "Terminou de estudar? Use **Concluir** no cartão da sessão. Se clicar sem querer, "
-        "o aviso no topo traz **Desfazer**.",
-    ),
-    (
-        f"{WEEK.title}: planejar os próximos dias",
-        "A agenda mostra suas sessões e as aulas da semana lado a lado, para você achar "
-        "horários livres.\n\n"
-        "Clique em uma sessão para **Editar** ou **Excluir**. As setas trocam de semana, "
-        "e **Ver semana em lista** mostra tudo em texto.",
-    ),
-    (
-        f"{PROGRESS.title}: acompanhar o ritmo",
-        "Aqui você ajusta a **meta semanal** e vê quanto estudou de cada disciplina.\n\n"
-        "Na parte de **Notas** você registra avaliações e acompanha a média do período.",
-    ),
-    (
-        f"{SUBJECTS.title}: organizar o semestre",
-        "Tudo começa aqui. No topo fica o **período acadêmico** (por exemplo, 2026.2), "
-        "que você pode trocar ou gerenciar.\n\n"
-        "Escolha uma disciplina para cadastrar **conteúdos** e **horários de aula**. "
-        "Se ficar com dúvida, o botão **Ajuda** na barra lateral reabre este tour.",
-    ),
+WELCOME_TEXT = (
+    "O Plano ajuda você a transformar o semestre em pequenos blocos de estudo. "
+    "O caminho é sempre o mesmo:\n\n"
+    "1. **Disciplinas**: cadastre o período, as matérias, os horários de aula e os conteúdos.\n"
+    "2. **Semana** ou **Hoje**: planeje sessões de estudo com **Nova sessão**.\n"
+    "3. **Hoje**: conclua as sessões quando terminar de estudar.\n"
+    "4. **Progresso**: acompanhe a meta, a carga por matéria e as notas.\n\n"
+    "Quer que a gente mostre onde fica cada coisa?"
 )
+
+COACH_STEPS = [
+    {
+        "nav": SUBJECTS.title,
+        "title": "Comece por Disciplinas",
+        "body": "Cadastre aqui o período, suas matérias e, em cada uma, os horários de aula "
+        "e os conteúdos. Dentro de cada disciplina há o botão Planejar sessão.",
+    },
+    {
+        "nav": WEEK.title,
+        "title": "Planeje a semana",
+        "body": "A agenda mostra suas sessões e as aulas lado a lado, para achar horários "
+        "livres. Clique numa sessão para editar ou excluir.",
+    },
+    {
+        "nav": TODAY.title,
+        "title": "Estude no dia",
+        "body": "Hoje mostra o que fazer agora. Quando terminar de estudar, use Concluir "
+        "no cartão da sessão. Se errar, o aviso traz Desfazer.",
+    },
+    {
+        "nav": PROGRESS.title,
+        "title": "Acompanhe o ritmo",
+        "body": "Ajuste a meta semanal, veja quanto estudou de cada disciplina e registre "
+        "suas notas.",
+    },
+    {
+        "selector": ".st-key-overview_first_steps",
+        "title": "Seu próximo passo",
+        "body": "Esta lista mostra o que falta para o plano ficar pronto. O botão leva "
+        "direto ao próximo passo.",
+    },
+    {
+        "selector": ".st-key-overview_new_session, .st-key-weekly_new_session",
+        "title": "Nova sessão",
+        "body": "Use este botão sempre que quiser planejar um bloco de estudo.",
+    },
+    {
+        "selector": ".st-key-open_help",
+        "title": "Ficou com dúvida?",
+        "body": "A Ajuda tem respostas rápidas e mostra estes balões de novo.",
+    },
+]
+
 
 HELP_ITEMS = (
     (
@@ -77,8 +97,9 @@ HELP_ITEMS = (
     ),
     (
         "Como planejo uma sessão?",
-        "Use **Nova sessão** no topo de **Hoje** ou de **Semana**. Os campos com \\* são "
-        "obrigatórios. Se faltar período ou disciplina, o próprio diálogo leva você até lá.",
+        "Use **Nova sessão** no topo de **Hoje** ou de **Semana**, ou **Planejar sessão** "
+        "dentro de cada disciplina. Os campos com \\* são obrigatórios. Se faltar período "
+        "ou disciplina, o próprio diálogo leva você até lá.",
     ),
     (
         "Como concluo ou desfaço uma sessão?",
@@ -110,17 +131,26 @@ HELP_ITEMS = (
 
 
 def open_tour() -> None:
+    """Abre a tela de boas-vindas."""
     open_dialog(TOUR_DIALOG, 0)
+
+
+def start_coach_marks() -> None:
+    """Começa (ou recomeça) os balões, fechando qualquer diálogo aberto."""
+    for key in (TOUR_DIALOG, HELP_DIALOG):
+        close_dialog(key)
+    st.session_state[COACH_STATE_KEY] = int(st.session_state.get(COACH_STATE_KEY, 0)) + 1
+
+
+def _coach_done() -> None:
+    st.session_state.pop(COACH_STATE_KEY, None)
+    st.session_state[_PENDING_COMPLETION_KEY] = True
 
 
 def _dismiss_tour() -> None:
     """Fechar no X ou com Esc também conta como "já vi o tour"."""
     close_dialog(TOUR_DIALOG)
     st.session_state[_PENDING_COMPLETION_KEY] = True
-
-
-def _set_tour_step(step: int) -> None:
-    st.session_state[TOUR_DIALOG] = step
 
 
 def _complete_tour(services: ApplicationServices, user: dict) -> None:
@@ -133,55 +163,22 @@ def _complete_tour(services: ApplicationServices, user: dict) -> None:
         show_action_error("salvar que você já viu o tour", error)
 
 
-@st.dialog("Conheça o Plano", width="medium", on_dismiss=_dismiss_tour)
+@st.dialog("Bem-vindo ao Plano", width="medium", on_dismiss=_dismiss_tour)
 def _tour_dialog(services: ApplicationServices, user: dict) -> None:
-    step = min(max(int(st.session_state.get(TOUR_DIALOG, 0)), 0), len(TOUR_STEPS) - 1)
-    title, body = TOUR_STEPS[step]
-    st.caption(f"Passo {step + 1} de {len(TOUR_STEPS)}")
-    st.progress((step + 1) / len(TOUR_STEPS))
-    st.subheader(title)
-    st.markdown(body)
-
-    is_last = step == len(TOUR_STEPS) - 1
-    back_column, skip_column, next_column = st.columns(3)
-    back_column.button(
-        "Anterior",
-        icon=":material/arrow_back:",
-        width="stretch",
-        disabled=step == 0,
-        key="tour_back",
-        on_click=_set_tour_step,
-        args=(step - 1,),
-    )
-    if not is_last:
-        if skip_column.button("Pular tour", width="stretch", key="tour_skip"):
-            close_dialog(TOUR_DIALOG)
-            _complete_tour(services, user)
-            st.rerun()
-        next_column.button(
-            "Próximo",
-            icon=":material/arrow_forward:",
-            type="primary",
-            width="stretch",
-            key="tour_next",
-            on_click=_set_tour_step,
-            args=(step + 1,),
-        )
-        return
-
-    needs_period = user.get("current_academic_period_id") is None
-    if needs_period:
-        st.info("Para começar, adicione o seu período acadêmico atual.")
-    if next_column.button(
-        "Adicionar período" if needs_period else "Começar",
-        type="primary",
-        width="stretch",
-        key="tour_finish",
-    ):
+    st.markdown(WELCOME_TEXT)
+    skip_column, start_column = st.columns(2)
+    if skip_column.button("Agora não", width="stretch", key="tour_skip"):
         close_dialog(TOUR_DIALOG)
         _complete_tour(services, user)
-        if needs_period:
-            open_periods_dialog()
+        st.rerun()
+    if start_column.button(
+        "Mostrar onde fica cada coisa",
+        type="primary",
+        icon=":material/tour:",
+        width="stretch",
+        key="tour_start",
+    ):
+        start_coach_marks()
         st.rerun()
 
 
@@ -200,12 +197,12 @@ def _help_dialog() -> None:
         with st.expander(question):
             st.markdown(answer)
     if st.button(
-        "Ver o tour de novo",
+        "Mostrar os balões de novo",
         icon=":material/tour:",
         width="stretch",
         key="help_replay_tour",
     ):
-        open_tour()
+        start_coach_marks()
         st.rerun()
 
 
@@ -215,13 +212,13 @@ def render_help_button() -> None:
         icon=":material/help:",
         width="stretch",
         key="open_help",
-        help="Perguntas frequentes e o tour de boas-vindas.",
+        help="Perguntas frequentes e os balões que mostram onde fica cada coisa.",
         on_click=open_help,
     )
 
 
 def render_onboarding_dialogs(services: ApplicationServices, user: dict) -> None:
-    """Abre o tour no primeiro acesso e desenha o tour ou a ajuda, se pedidos."""
+    """Abre as boas-vindas no primeiro acesso e desenha o que estiver pedido."""
     if st.session_state.get(_PENDING_COMPLETION_KEY):
         _complete_tour(services, user)
     if (
@@ -236,6 +233,14 @@ def render_onboarding_dialogs(services: ApplicationServices, user: dict) -> None
         _tour_dialog(services, user)
     elif current == HELP_DIALOG:
         _help_dialog()
+    elif st.session_state.get(COACH_STATE_KEY):
+        with st.sidebar:
+            render_coach_marks(
+                run=int(st.session_state[COACH_STATE_KEY]),
+                steps=COACH_STEPS,
+                on_done=_coach_done,
+                key="plan_coach_marks",
+            )
 
 
 def load_onboarding_steps(
@@ -287,7 +292,7 @@ def render_first_steps(services: ApplicationServices, user: dict, subjects: list
     done_count = sum(step.done for step in steps)
     with st.container(border=True, key="overview_first_steps"):
         heading_column, count_column = st.columns([3, 1], vertical_alignment="center")
-        heading_column.subheader("Primeiros passos")
+        heading_column.subheader("Primeiros passos", anchor=False)
         count_column.markdown(f"**{done_count} de {len(steps)}** feitos")
         st.progress(done_count / len(steps))
         st.markdown(
@@ -330,3 +335,54 @@ def _render_next_step_action(step: OnboardingStep) -> None:
         st.caption(
             "Quando terminar de estudar, use **Concluir** no cartão da sessão, logo abaixo."
         )
+
+
+_SUBJECTS_HINTS = {
+    "subject": "Próximo passo: adicione sua primeira disciplina com **Adicionar disciplina**.",
+    "class": "Próximo passo: escolha uma disciplina e cadastre um horário em "
+    "**Horários de aula**, mais abaixo.",
+    "topic": "Próximo passo: cadastre um conteúdo que você precisa estudar em **Conteúdos**, "
+    "mais abaixo.",
+    "session": "Tudo pronto para estudar! Use **Planejar sessão** no fim do cartão da "
+    "disciplina para marcar quando vai estudar.",
+}
+
+
+def render_subjects_next_step(
+    services: ApplicationServices, user: dict, subjects: list[dict]
+) -> None:
+    """Na tela Disciplinas, diz qual é o próximo passo enquanto o plano não está pronto."""
+    if user.get("current_academic_period_id") is None:
+        return
+    try:
+        upcoming = next_step(load_onboarding_steps(services, user, subjects))
+    except Exception:
+        return
+    if upcoming is None:
+        return
+    if upcoming.key in _SUBJECTS_HINTS:
+        st.info(_SUBJECTS_HINTS[upcoming.key], icon=":material/flag:")
+    elif upcoming.key == "complete":
+        hint_column, link_column = st.columns([3, 1], vertical_alignment="center")
+        hint_column.info(
+            "Sessão planejada. Quando terminar de estudar, conclua a sessão em **Hoje**.",
+            icon=":material/flag:",
+        )
+        with link_column:
+            st.page_link(TODAY.path, label="Ir para Hoje", icon=TODAY.icon)
+
+
+def render_plan_session_footer(subject: dict) -> None:
+    """Fecha o cartão da disciplina com o caminho natural: planejar quando estudar."""
+    st.divider()
+    text_column, button_column = st.columns([3, 1], vertical_alignment="center")
+    text_column.markdown(f"**Próximo passo:** planejar quando estudar {subject['name']}.")
+    button_column.button(
+        "Planejar sessão",
+        type="primary",
+        icon=":material/event:",
+        width="stretch",
+        key="subjects_plan_session",
+        on_click=open_session_dialog,
+        args=(None, subject["_id"]),
+    )

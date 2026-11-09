@@ -11,6 +11,7 @@ from src.ui.feedback import set_success_flash, show_action_error
 from src.ui.sections.class_schedule import render_class_schedule_section
 from src.ui.sections.periods import render_period_bar
 from src.ui.sections.topics import render_topics_section
+from src.ui.onboarding import render_plan_session_footer, render_subjects_next_step
 from src.ui.sidebar import render_account_sidebar
 
 
@@ -55,6 +56,7 @@ if current_period_id is None:
             st.write(f"- {subject['name']}")
     st.stop()
 
+render_subjects_next_step(services, user, subjects)
 heading_column, action_column = st.columns([3, 1], vertical_alignment="bottom")
 heading_column.header("Suas disciplinas", anchor="suas-disciplinas")
 if action_column.button(
@@ -115,6 +117,7 @@ else:
         st.subheader("Horários de aula")
         st.caption("As aulas também aparecem na Semana, junto com as sessões de estudo.")
         render_class_schedule_section(services, user, subjects, detail_subject_id)
+        render_plan_session_footer(subject)
 
 
 if legacy_subjects:

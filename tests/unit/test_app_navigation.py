@@ -1,5 +1,5 @@
 from calendar import monthrange
-from datetime import date, timedelta
+from datetime import date, time, timedelta
 from pathlib import Path
 import json
 import sys
@@ -236,45 +236,63 @@ def test_period_is_managed_from_subjects_and_shown_in_sidebar(local_app):
     assert "plan_periods_dialog" not in app.session_state
 
 
-def test_tour_opens_on_first_access_and_skip_is_saved(local_app):
+def test_welcome_opens_on_first_access_and_skip_is_saved(local_app):
     app = local_app
     assert app.session_state["plan_tour_dialog"] == 0
-    assert any(item.value == "Passo 1 de 5" for item in app.caption)
-
-    app.button(key="tour_next").click().run()
-    assert app.session_state["plan_tour_dialog"] == 1
-    assert any(item.value == "Passo 2 de 5" for item in app.caption)
-    app.button(key="tour_back").click().run()
-    assert app.session_state["plan_tour_dialog"] == 0
+    assert app.button(key="tour_start")
 
     app.button(key="tour_skip").click().run()
     assert not app.exception
     assert "plan_tour_dialog" not in app.session_state
+    assert "plan_coach_run" not in app.session_state
     assert get_database().users.find_one().get("onboarding_completed_at")
 
-    # Uma nova sessão do navegador não abre o tour de novo.
+    # Uma nova sessão do navegador não abre as boas-vindas de novo.
     fresh = AppTest.from_file(str(APP_PATH), default_timeout=20).run()
     fresh.button(key="local_demo_login").click().run()
     assert not fresh.exception
     assert "plan_tour_dialog" not in fresh.session_state
 
 
-def test_tour_finishes_on_last_step_and_reopens_from_help(local_app):
+def test_welcome_starts_balloons_and_help_restarts_them(local_app):
     app = local_app
-    for _ in range(4):
-        app.button(key="tour_next").click().run()
-    assert any(item.value == "Passo 5 de 5" for item in app.caption)
-    app.button(key="tour_finish").click().run()
+    app.button(key="tour_start").click().run()
+    assert not app.exception
     assert "plan_tour_dialog" not in app.session_state
-    assert get_database().users.find_one().get("onboarding_completed_at")
+    assert app.session_state["plan_coach_run"] == 1
 
     app.button(key="open_help").click().run()
     assert not app.exception
     assert app.session_state["plan_help_dialog"] is True
     assert len(app.expander) >= 8
     app.button(key="help_replay_tour").click().run()
+    assert not app.exception
     assert "plan_help_dialog" not in app.session_state
-    assert app.session_state["plan_tour_dialog"] == 0
+    assert app.session_state["plan_coach_run"] == 2
+
+
+def test_subject_card_leads_to_planning_a_session(local_app):
+    app = local_app
+    app.button(key="tour_skip").click().run()
+    app.switch_page("app_pages/subjects.py").run()
+    assert not app.exception
+    subject_id = app.pills(key="subjects_detail").value
+    app.button(key="subjects_plan_session").click().run()
+    assert not app.exception
+    assert app.session_state["plan_session_dialog"]["subject_id"] == subject_id
+    assert app.selectbox(key="new_session_subject").value == subject_id
+
+    next(
+        item for item in app.text_input if item.label == "O que você vai estudar? *"
+    ).input("Revisar a matéria da última aula")
+    # Horário tarde para não conflitar com as sessões da demonstração.
+    next(item for item in app.time_input if item.label == "Horário *").set_value(time(23, 0))
+    next(
+        button for button in app.button if button.label == "Adicionar sessão"
+    ).click().run()
+    assert not app.exception
+    assert "plan_session_dialog" not in app.session_state
+    assert any("Quando estudar" in item.value for item in app.success)
 
 
 def test_opening_another_dialog_closes_the_tour(local_app):
