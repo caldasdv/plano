@@ -4,12 +4,14 @@ from __future__ import annotations
 
 from datetime import date, time
 from typing import Any
+from collections.abc import Callable
 
 import streamlit as st
 
 from src.services.container import ApplicationServices
+from src.ui.dialog_state import SESSION_DIALOG, active_dialog, close_dialog, open_dialog
 from src.ui.feedback import set_success_flash, show_action_error
-from src.ui.navigation import SUBJECTS
+from src.ui.navigation import SUBJECTS, WEEK
 
 
 DURATIONS = [25, 45, 60, 90, 120]
@@ -45,6 +47,8 @@ def _session_form(
     *,
     session: dict[str, Any] | None,
     key: str,
+    preset_subject_id: Any | None = None,
+    on_saved: Callable[[], None] | None = None,
 ) -> None:
     subjects = _load_subjects(services, user)
     if subjects is None or _missing_setup(user, subjects):
@@ -52,7 +56,7 @@ def _session_form(
     period_id = user["current_academic_period_id"]
     subjects_by_id = {subject["_id"]: subject for subject in subjects}
     subject_ids = list(subjects_by_id)
-    default_subject = session.get("subject_id") if session else None
+    default_subject = session.get("subject_id") if session else preset_subject_id
     subject_id = st.selectbox(
         "Disciplina",
         subject_ids,
@@ -144,21 +148,27 @@ def _session_form(
     except Exception as error:
         show_action_error("salvar a sessão", error)
     else:
+        if on_saved is not None:
+            on_saved()
+            return
         close_session_dialog()
-        set_success_flash("Sessão atualizada." if session else "Sessão adicionada ao seu plano.")
+        if session:
+            set_success_flash("Sessão atualizada.")
+        else:
+            set_success_flash(
+                "Sessão adicionada ao seu plano. Quando estudar, conclua a sessão em Hoje.",
+                link=(WEEK.path, "Ver na Semana", WEEK.icon),
+            )
         st.rerun()
 
 
-_DIALOG_STATE_KEY = "plan_session_dialog"
-
-
-def open_session_dialog(session: dict | None = None) -> None:
+def open_session_dialog(session: dict | None = None, subject_id: Any | None = None) -> None:
     """Abre o diálogo de criar (sem ``session``) ou editar sessão.
 
     O estado fica na sessão do Streamlit para o diálogo continuar aberto entre
     reruns e fechar só quando o usuário salva ou dispensa.
     """
-    st.session_state[_DIALOG_STATE_KEY] = {"session": session}
+    open_dialog(SESSION_DIALOG, {"session": session, "subject_id": subject_id})
 
 
 def render_new_session_button(key: str) -> None:
@@ -175,13 +185,17 @@ def render_new_session_button(key: str) -> None:
 
 
 def close_session_dialog() -> None:
-    st.session_state.pop(_DIALOG_STATE_KEY, None)
+    close_dialog(SESSION_DIALOG)
 
 
 @st.dialog("Nova sessão", width="medium", on_dismiss=close_session_dialog)
-def _new_session_dialog(services: ApplicationServices, user: dict) -> None:
+def _new_session_dialog(
+    services: ApplicationServices, user: dict, subject_id: Any | None = None
+) -> None:
     st.caption("Defina uma sessão pequena e objetiva para facilitar o início do estudo.")
-    _session_form(services, user, session=None, key="new_session")
+    _session_form(
+        services, user, session=None, key="new_session", preset_subject_id=subject_id
+    )
 
 
 @st.dialog("Editar sessão", width="medium", on_dismiss=close_session_dialog)
@@ -191,10 +205,13 @@ def _edit_session_dialog(services: ApplicationServices, user: dict, session: dic
 
 def render_session_dialog(services: ApplicationServices, user: dict) -> None:
     """Mostra o diálogo pedido, se houver. Chamado uma vez por execução, na sidebar."""
-    state = st.session_state.get(_DIALOG_STATE_KEY)
-    if state is None:
+    if active_dialog() != SESSION_DIALOG:
         return
+    state = st.session_state[SESSION_DIALOG]
     if state["session"] is None:
-        _new_session_dialog(services, user)
+        _new_session_dialog(services, user, state.get("subject_id"))
     else:
         _edit_session_dialog(services, user, state["session"])
+
+
+render_session_form = _session_form

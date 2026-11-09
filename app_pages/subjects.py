@@ -1,36 +1,22 @@
 """Tela de disciplinas."""
 
-from html import escape
-import re
-
 import streamlit as st
 
 from src.ui.context import load_current_period_subjects, load_legacy_subjects, load_page_context
 from src.ui.components.page_header import render_page_header
 from src.ui.feedback import set_success_flash, show_action_error
-from src.ui.sections.class_schedule import render_class_schedule_section
+from src.ui.forms import new_subject_form
 from src.ui.sections.periods import render_period_bar
-from src.ui.sections.topics import render_topics_section
+from src.ui.sections.subject_cards import render_subject_cards, render_subject_dialog
+from src.ui.onboarding import render_subjects_next_step
 from src.ui.sidebar import render_account_sidebar
 
 
 @st.dialog("Adicionar disciplina", width="small")
-def new_subject_dialog(period_id) -> None:
-    with st.form("new_subject", border=False):
-        subject_name = st.text_input("Nome *", placeholder="Ex.: Banco de Dados")
-        color = st.color_picker("Cor", "#5E6AD2", help="Ajuda a reconhecer a disciplina na agenda.")
-        st.caption("Campos com \\* são obrigatórios.")
-        submitted = st.form_submit_button("Adicionar disciplina", type="primary", width="stretch")
-    if submitted:
-        try:
-            services.subjects.create(user["_id"], period_id, subject_name, color)
-        except ValueError as error:
-            st.error(str(error))
-        except Exception as error:
-            show_action_error("adicionar a disciplina", error)
-        else:
-            set_success_flash("Disciplina adicionada.")
-            st.rerun()
+def new_subject_dialog() -> None:
+    if new_subject_form(services, user, key="new_subject") is not None:
+        set_success_flash("Disciplina adicionada. Agora cadastre os horários e os conteúdos dela.")
+        st.rerun()
 
 
 services, user, _subjects = load_page_context()
@@ -55,8 +41,9 @@ if current_period_id is None:
             st.write(f"- {subject['name']}")
     st.stop()
 
+render_subjects_next_step(services, user, subjects)
 heading_column, action_column = st.columns([3, 1], vertical_alignment="bottom")
-heading_column.header("Suas disciplinas", anchor="suas-disciplinas")
+heading_column.header("Suas disciplinas", anchor=False)
 if action_column.button(
     "Adicionar disciplina",
     type="primary" if not subjects else "secondary",
@@ -64,57 +51,12 @@ if action_column.button(
     width="stretch",
     key="subjects_add",
 ):
-    new_subject_dialog(current_period_id)
+    new_subject_dialog()
 if not subjects:
     st.info("Nenhuma disciplina no período atual. Use \"Adicionar disciplina\" para começar.")
 else:
-    subjects_by_id = {subject["_id"]: subject for subject in subjects}
-    detail_subject_id = st.pills(
-        "Escolha uma disciplina para ver os conteúdos e os horários de aula",
-        list(subjects_by_id),
-        format_func=lambda value: subjects_by_id[value]["name"],
-        default=next(iter(subjects_by_id)),
-        key="subjects_detail",
-    )
-    if detail_subject_id is None:
-        detail_subject_id = next(iter(subjects_by_id))
-    subject = subjects_by_id[detail_subject_id]
-    color = subject.get("color", "#787774")
-    safe_color = color if re.fullmatch(r"#[0-9A-Fa-f]{6}", str(color)) else "#787774"
-
-    with st.container(border=True):
-        title_column, edit_column = st.columns([3, 1], vertical_alignment="center")
-        title_column.markdown(
-            f'<h2 class="plan-subject-title"><span class="subject-dot" '
-            f'style="background:{safe_color}" aria-hidden="true"></span>'
-            f"{escape(subject['name'])}</h2>",
-            unsafe_allow_html=True,
-        )
-        with edit_column.popover("Editar disciplina", icon=":material/edit:", width="stretch"):
-            with st.form(f"edit_subject_{subject['_id']}", border=False):
-                edited_name = st.text_input("Nome da disciplina", value=subject["name"])
-                edited_color = st.color_picker("Cor da disciplina", safe_color)
-                save_edit = st.form_submit_button(
-                    "Salvar alterações", type="primary", width="stretch"
-                )
-            if save_edit:
-                try:
-                    services.subjects.update(
-                        user["_id"], subject["_id"], current_period_id, edited_name, edited_color
-                    )
-                except ValueError as error:
-                    st.error(str(error))
-                except Exception as error:
-                    show_action_error("salvar a disciplina", error)
-                else:
-                    set_success_flash("Disciplina atualizada.")
-                    st.rerun()
-
-        st.subheader("Conteúdos")
-        render_topics_section(services, user, subjects, detail_subject_id)
-        st.subheader("Horários de aula")
-        st.caption("As aulas também aparecem na Semana, junto com as sessões de estudo.")
-        render_class_schedule_section(services, user, subjects, detail_subject_id)
+    render_subject_cards(services, user, subjects)
+    render_subject_dialog(services, user, subjects)
 
 
 if legacy_subjects:

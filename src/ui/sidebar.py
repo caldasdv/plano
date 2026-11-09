@@ -11,6 +11,7 @@ from src.config.runtime import is_local_mode
 from src.ui.components.session_dialog import render_session_dialog
 from src.ui.sections.periods import find_current_period, render_periods_dialog
 from src.ui.feedback import show_action_error
+from src.ui.onboarding import render_help_button, render_onboarding_dialogs
 
 
 def _toggle_theme(services: ApplicationServices, user: dict) -> None:
@@ -44,6 +45,7 @@ def render_account_sidebar(services: ApplicationServices, user: dict) -> None:
             st.session_state.pop("plan_local_profile", None)
             st.rerun()
     st.sidebar.divider()
+    render_help_button()
     dark_mode = bool(user.get("dark_mode", False))
     st.session_state["plan_dark_mode"] = dark_mode
     st.sidebar.button(
@@ -61,3 +63,4 @@ def render_account_sidebar(services: ApplicationServices, user: dict) -> None:
         )
     render_session_dialog(services, user)
     render_periods_dialog(services, user)
+    render_onboarding_dialogs(services, user)
