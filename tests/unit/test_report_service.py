@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date
 
 from src.services.report_service import (
     build_adaptive_goal_plan,
