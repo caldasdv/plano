@@ -9,7 +9,8 @@ from src.ui.components.session_card import render_session_card
 from src.ui.components.study_rhythm import render_study_rhythm
 from src.ui.components.page_header import render_page_header
 from src.ui.components.session_dialog import render_new_session_button
-from src.ui.navigation import PERIODS, PROGRESS, SUBJECTS
+from src.ui.navigation import PROGRESS, SUBJECTS
+from src.ui.sections.periods import open_periods_dialog
 from src.ui.context import load_current_period_subjects, load_page_context, load_page_sessions
 from src.ui.feedback import set_success_flash, show_action_error
 from src.ui.sidebar import render_account_sidebar
@@ -28,8 +29,13 @@ if user.get("current_academic_period_id") is None:
     with st.container(border=True):
         st.subheader("Vamos preparar seu plano")
         st.write("Crie um período acadêmico para depois adicionar disciplinas e sessões de estudo.")
-        if st.button("Adicionar período acadêmico", type="primary", icon=PERIODS.icon):
-            st.switch_page(PERIODS.path)
+        st.button(
+            "Adicionar período acadêmico",
+            type="primary",
+            icon=":material/date_range:",
+            key="overview_add_period",
+            on_click=open_periods_dialog,
+        )
     st.stop()
 
 current_subjects = load_current_period_subjects(
@@ -71,8 +77,8 @@ st.markdown(
             <h2>Pequenos blocos.<br><em>Um semestre inteiro.</em></h2>
             <p>Você já tem um mapa. Agora é só escolher o próximo passo.</p>
         </div>
-        <div class="plan-overview-orbit plan-overview-orbit-a"></div>
-        <div class="plan-overview-orbit plan-overview-orbit-b"></div>
+        <div class="plan-overview-orbit plan-overview-orbit-a" aria-hidden="true"></div>
+        <div class="plan-overview-orbit plan-overview-orbit-b" aria-hidden="true"></div>
         <div class="plan-overview-hero-stat">
             <span>pulso da semana</span>
             <strong>{completed_minutes}<small> min</small></strong>

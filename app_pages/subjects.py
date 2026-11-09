@@ -8,8 +8,8 @@ import streamlit as st
 from src.ui.context import load_current_period_subjects, load_legacy_subjects, load_page_context
 from src.ui.components.page_header import render_page_header
 from src.ui.feedback import set_success_flash, show_action_error
-from src.ui.navigation import PERIODS
 from src.ui.sections.class_schedule import render_class_schedule_section
+from src.ui.sections.periods import render_period_bar
 from src.ui.sections.topics import render_topics_section
 from src.ui.sidebar import render_account_sidebar
 
@@ -40,13 +40,12 @@ render_page_header(
     "Disciplinas",
     "Cadastre as disciplinas do período e, em cada uma, os conteúdos e os horários de aula.",
 )
+render_period_bar(services, user)
 
 current_period_id = user.get("current_academic_period_id")
 subjects = load_current_period_subjects(services, user, retry_key="retry_subjects_loading")
 legacy_subjects = load_legacy_subjects(services, user, retry_key="retry_legacy_subjects_loading")
 if current_period_id is None:
-    st.info("Defina um período acadêmico atual antes de adicionar disciplinas.")
-    st.page_link(PERIODS.path, label="Ir para Períodos acadêmicos", icon=PERIODS.icon)
     if legacy_subjects:
         st.subheader("Disciplinas sem período")
         st.caption(
