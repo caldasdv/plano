@@ -34,17 +34,9 @@ def render_account_sidebar(services: ApplicationServices, user: dict) -> None:
         f'<span>{escape(str(user["email"]))}</span>{period_line}</div>',
         unsafe_allow_html=True,
     )
-    if not is_local_mode() and st.sidebar.button("Sair", width="stretch"):
-        st.logout()
     if is_local_mode():
         st.sidebar.caption("Ambiente local · dados temporários")
-        if st.sidebar.button(
-            "Sair da demonstração", width="stretch", key="local_demo_logout"
-        ):
-            st.session_state.pop("plan_local_authenticated", None)
-            st.session_state.pop("plan_local_profile", None)
-            st.rerun()
-    st.sidebar.divider()
+    # Ações da conta no mesmo estilo da navegação: ícone e texto, sem caixa.
     render_help_button()
     dark_mode = bool(user.get("dark_mode", False))
     st.session_state["plan_dark_mode"] = dark_mode
@@ -56,6 +48,19 @@ def render_account_sidebar(services: ApplicationServices, user: dict) -> None:
         on_click=_toggle_theme,
         args=(services, user),
     )
+    if not is_local_mode() and st.sidebar.button(
+        "Sair", icon=":material/logout:", width="stretch", key="account_logout"
+    ):
+        st.logout()
+    if is_local_mode() and st.sidebar.button(
+        "Sair da demonstração",
+        icon=":material/logout:",
+        width="stretch",
+        key="local_demo_logout",
+    ):
+        st.session_state.pop("plan_local_authenticated", None)
+        st.session_state.pop("plan_local_profile", None)
+        st.rerun()
     if dark_mode:
         st.sidebar.markdown(
             '<span class="plan-dark-mode-marker" aria-hidden="true"></span>',
