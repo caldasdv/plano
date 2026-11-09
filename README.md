@@ -26,17 +26,36 @@ O fluxo cobre períodos, disciplinas, grade de aulas, conteúdos, sessões, aval
 
 - Google OIDC e isolamento por identidade do provedor;
 - períodos acadêmicos e disciplinas do período atual;
-- grade semanal com prevenção de conflitos;
-- tópicos e subtópicos de conteúdo;
-- sessões com objetivo, prioridade, duração e conclusão;
-- navegação em quatro lugares fixos: Hoje, Semana, Progresso (metas e notas) e Disciplinas (conteúdos e horários);
-- botão "Nova sessão" no topo de Hoje e Semana, em diálogo, com opção de desfazer a conclusão;
-- boas-vindas com balões que apontam para a tela real, assistente "Montar meu plano" em pop-up (período, disciplina, aula, conteúdo e primeira sessão) e botão "Ajuda" com perguntas frequentes;
-- Disciplinas em cartões com resumo; conteúdos, horários e edição abrem em pop-up;
+- grade semanal de aulas com prevenção de conflitos;
+- conteúdos (tópicos e subtópicos) por disciplina;
+- sessões com objetivo, prioridade, duração, conclusão e opção de desfazer;
 - análise de notas por disciplina;
 - metas adaptativas por notas, dificuldade ou pendências;
-- tema claro/escuro persistido;
+- boas-vindas, assistente "Montar meu plano" e Ajuda para quem está começando;
+- tema claro/escuro persistido na conta;
+- acessibilidade WCAG 2.1 AA conferida com axe-core nos dois temas;
 - branch `local-demo` sem Google e sem MongoDB Atlas.
+
+## Como o app é organizado
+
+A barra lateral tem quatro lugares fixos, na ordem do ciclo de estudo:
+
+| Lugar | Para que serve |
+|---|---|
+| **Hoje** | o que fazer agora: "Nova sessão", meta da semana, sessões do dia e "Primeiros passos" para quem está começando |
+| **Semana** | agenda com sessões e aulas lado a lado; editar ou excluir uma sessão |
+| **Progresso** | meta semanal, carga por disciplina e notas |
+| **Disciplinas** | período atual e um cartão por disciplina com Conteúdos, Horários, Planejar sessão e Editar |
+
+Abaixo do cartão da conta ficam Ajuda, modo claro/escuro e Sair, no mesmo estilo da navegação.
+
+Cadastrar e editar acontece sempre em pop-up, e só um fica aberto por vez. No primeiro acesso, as boas-vindas oferecem três caminhos:
+
+- **Montar meu plano agora**: assistente em pop-up com período, disciplina, horário de aula, conteúdo e primeira sessão. Horário e conteúdo podem ser pulados, e o assistente retoma de onde parou.
+- **Mostrar onde fica cada coisa**: balões que apontam para os itens reais da tela.
+- **Agora não**: fecha e registra na conta que as boas-vindas já foram vistas.
+
+A Ajuda reúne perguntas frequentes e mostra os balões de novo.
 
 ## Rodar em dois minutos
 
@@ -45,8 +64,8 @@ O fluxo cobre períodos, disciplinas, grade de aulas, conteúdos, sessões, aval
 Não exige Secrets, Google ou banco externo. Os dados são temporários.
 
 ```bash
-git clone -b local-demo git@github.com:caldasdv/IhcStreamlitApp.git
-cd IhcStreamlitApp
+git clone -b local-demo git@github.com:caldasdv/plano.git
+cd plano
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
@@ -84,7 +103,7 @@ python scripts/seed_sample_account.py --email voce@exemplo.com --apply
 
 Ative somente com `PLANO_LOCAL_MODE=true`:
 
-- entrada pela demonstração (`local-demo-user`) ou por um plano vazio (`local-empty-user`);
+- entrada pela demonstração (`local-demo-user`, com dados prontos) ou por "Começar com plano vazio" (`local-empty-user`, ideal para ver as boas-vindas e o assistente);
 - `mongomock` em memória;
 - um mês de aulas, sessões e avaliações em seis disciplinas;
 - dados descartados ao encerrar o processo;
@@ -109,15 +128,22 @@ O projeto é um monólito modular. As páginas não acessam o banco diretamente;
 ## Estrutura
 
 ```text
-app.py                 entrypoint
-app_pages/             páginas do Streamlit
-src/ui/                shell, estilos e componentes
-src/services/          casos de uso
-src/domain/            regras testáveis
-src/repositories/      interfaces e MongoDB
-src/database/          conexão e índices
-tests/                 testes unitários
-assets/                identidade visual
+app.py                     entrypoint
+app_pages/                 as quatro telas: overview (Hoje), weekly, progress, subjects
+src/ui/                    shell, navegação, barra lateral, estilos e feedback
+src/ui/components/         componentes visuais (agenda, balões, diálogo de sessão, gráficos)
+src/ui/sections/           blocos de tela (períodos, cartões de disciplina, metas, notas)
+src/ui/forms.py            formulários compartilhados entre pop-ups e assistente
+src/ui/onboarding.py       boas-vindas, balões, Ajuda e "Primeiros passos"
+src/ui/setup_wizard.py     assistente "Montar meu plano"
+src/ui/dialog_state.py     garante um pop-up aberto por vez
+src/services/              casos de uso
+src/domain/                regras testáveis
+src/repositories/          interfaces e MongoDB
+src/database/              conexão, índices e dados de exemplo
+scripts/                   seed de conta de exemplo
+tests/                     testes unitários e de interface (AppTest)
+assets/                    identidade visual
 ```
 
 ## Testar
@@ -128,7 +154,7 @@ python -m compileall -q app.py app_pages src tests
 python -m pip check
 ```
 
-Os testes unitários não exigem Google, Secrets ou Atlas.
+Os testes não exigem Google, Secrets ou Atlas. Os testes de interface usam `streamlit.testing.v1.AppTest` no modo local e cobrem a navegação, os pop-ups, o assistente e as boas-vindas.
 
 ## Branches
 
@@ -149,7 +175,7 @@ git switch -c feature/nome-da-mudanca
 git push -u origin feature/nome-da-mudanca
 ```
 
-`main` só recebe alterações após revisão e autorização de merge.
+`main` só recebe alterações após revisão e autorização de merge. Depois de cada merge na `main`, a `local-demo` é atualizada por um PR `main → local-demo`.
 
 ## Segurança
 
