@@ -9,6 +9,7 @@ import streamlit as st
 from src.services.container import ApplicationServices
 from src.config.runtime import is_local_mode
 from src.ui.components.session_dialog import render_session_dialog
+from src.ui.sections.periods import find_current_period, render_periods_dialog
 from src.ui.feedback import show_action_error
 
 
@@ -23,9 +24,13 @@ def _toggle_theme(services: ApplicationServices, user: dict) -> None:
 
 
 def render_account_sidebar(services: ApplicationServices, user: dict) -> None:
+    current_period = find_current_period(services, user) if hasattr(services, "academic_periods") else None
+    period_line = (
+        f'<span>Período: {escape(str(current_period["name"]))}</span>' if current_period else ""
+    )
     st.sidebar.markdown(
         f'<div class="plan-sidebar-user"><strong>{escape(str(user["name"]))}</strong>'
-        f'<span>{escape(str(user["email"]))}</span></div>',
+        f'<span>{escape(str(user["email"]))}</span>{period_line}</div>',
         unsafe_allow_html=True,
     )
     if not is_local_mode() and st.sidebar.button("Sair", width="stretch"):
@@ -55,3 +60,4 @@ def render_account_sidebar(services: ApplicationServices, user: dict) -> None:
             unsafe_allow_html=True,
         )
     render_session_dialog(services, user)
+    render_periods_dialog(services, user)

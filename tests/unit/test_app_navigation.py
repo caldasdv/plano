@@ -9,7 +9,7 @@ from streamlit.testing.v1 import AppTest
 
 from src.database.connection import get_database
 from src.services.user_service import UserService
-from src.ui.navigation import MAIN_PLACES, SETTINGS
+from src.ui.navigation import MAIN_PLACES
 
 
 APP_PATH = Path(__file__).resolve().parents[2] / "app.py"
@@ -18,7 +18,6 @@ PAGES = {
     "weekly": "Semana",
     "progress": "Progresso",
     "subjects": "Disciplinas",
-    "academic_periods": "Períodos acadêmicos",
 }
 
 
@@ -68,7 +67,7 @@ def assert_page_and_theme(app, title, dark_mode):
 
 def test_navigation_has_four_main_places_in_cycle_order():
     assert [place.title for place in MAIN_PLACES] == ["Hoje", "Semana", "Progresso", "Disciplinas"]
-    assert all((APP_PATH.parent / place.path).exists() for place in (*MAIN_PLACES, *SETTINGS))
+    assert all((APP_PATH.parent / place.path).exists() for place in MAIN_PLACES)
 
 
 @pytest.mark.parametrize("dark_mode", [False, True])
@@ -220,3 +219,18 @@ def test_evaluation_filter_updates_chart_and_summary_for_selected_subject(local_
 
     assert_page_and_theme(app, "Progresso", dark_mode)
     assert metric_value(app, "Avaliações") == str(database.evaluations.count_documents({}))
+
+
+def test_period_is_managed_from_subjects_and_shown_in_sidebar(local_app):
+    app = local_app
+    database = get_database()
+    app.switch_page("app_pages/subjects.py").run()
+    assert any("Período: " in item.value for item in app.sidebar.markdown)
+
+    app.button(key="subjects_manage_period").click().run()
+    next(item for item in app.text_input if item.label == "Nome *").input("2027.1")
+    next(button for button in app.button if button.label == "Adicionar período").click().run()
+
+    assert not app.exception
+    assert database.academic_periods.find_one({"name": "2027.1"})
+    assert "plan_periods_dialog" not in app.session_state

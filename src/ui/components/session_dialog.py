@@ -9,7 +9,7 @@ import streamlit as st
 
 from src.services.container import ApplicationServices
 from src.ui.feedback import set_success_flash, show_action_error
-from src.ui.navigation import PERIODS, SUBJECTS
+from src.ui.navigation import SUBJECTS
 
 
 DURATIONS = [25, 45, 60, 90, 120]
@@ -29,8 +29,8 @@ def _load_subjects(services: ApplicationServices, user: dict) -> list[dict] | No
 def _missing_setup(user: dict, subjects: list[dict]) -> bool:
     """Explica o pré-requisito que falta e leva direto até ele (recuperação apoiada)."""
     if user.get("current_academic_period_id") is None:
-        st.info("Para criar sessões, primeiro adicione um período acadêmico.")
-        st.page_link(PERIODS.path, label="Ir para Períodos acadêmicos", icon=PERIODS.icon)
+        st.info("Para criar sessões, primeiro adicione um período acadêmico em Disciplinas.")
+        st.page_link(SUBJECTS.path, label="Ir para Disciplinas", icon=SUBJECTS.icon)
         return True
     if not subjects:
         st.info("Para criar sessões, primeiro adicione uma disciplina ao período atual.")
