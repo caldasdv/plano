@@ -57,6 +57,11 @@ class MongoUserRepository:
         if result.matched_count == 0:
             raise EntityNotFoundError("O usuário autenticado não foi encontrado.")
 
+    def mark_onboarding_completed(self, user_id: Any) -> None:
+        self.collection.update_one(
+            {"_id": user_id}, {"$set": {"onboarding_completed_at": datetime.now(UTC)}}
+        )
+
 
 class MongoAcademicPeriodRepository:
     def __init__(self, database) -> None:

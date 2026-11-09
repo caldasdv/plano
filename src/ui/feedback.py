@@ -11,13 +11,23 @@ import streamlit as st
 logger = logging.getLogger(__name__)
 
 
-def set_success_flash(message: str, *, undo_session_id: Any | None = None, user_id: Any | None = None) -> None:
+def set_success_flash(
+    message: str,
+    *,
+    undo_session_id: Any | None = None,
+    user_id: Any | None = None,
+    link: tuple[str, str, str] | None = None,
+) -> None:
     """Preserva uma confirmação para a próxima execução após um rerun.
 
     Quando ``undo_session_id`` é informado, a confirmação oferece "Desfazer",
     que devolve a sessão concluída para pendente (controle e liberdade).
     """
     st.session_state["flash_message"] = message
+    if link is not None:
+        st.session_state["flash_link"] = link
+    else:
+        st.session_state.pop("flash_link", None)
     if undo_session_id is not None:
         st.session_state["flash_undo"] = {"session_id": undo_session_id, "user_id": user_id}
     else:
@@ -43,7 +53,15 @@ def render_flash() -> None:
         st.error(error)
     message = st.session_state.pop("flash_message", None)
     undo = st.session_state.pop("flash_undo", None)
+    link = st.session_state.pop("flash_link", None)
     if not message:
+        return
+    if link is not None:
+        message_column, link_column = st.columns([4, 1], vertical_alignment="center")
+        message_column.success(message)
+        path, label, icon = link
+        with link_column:
+            st.page_link(path, label=label, icon=icon)
         return
     if undo is None:
         st.success(message)

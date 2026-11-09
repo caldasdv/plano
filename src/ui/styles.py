@@ -110,8 +110,8 @@ def apply_styles() -> None:
         [data-testid="stSidebar"] [data-testid="stNumberInput"] [data-baseweb="input"] { background: rgba(255, 255, 255, .12); }
         .stButton button, .stFormSubmitButton button { border-radius: 11px; border-width: 1px; box-shadow: none; font-weight: 700; min-height: 2.7rem; transition: transform .15s ease, box-shadow .15s ease, background .15s ease; }
         .stButton button:hover { box-shadow: 0 6px 16px rgba(6, 69, 127, .16); transform: translateY(-1px); }
-        .stButton button[kind="primary"], .stFormSubmitButton button[kind="primary"] { background: var(--plan-accent); border-color: var(--plan-accent); color: #ffffff; }
-        .stButton button[kind="primary"]:hover, .stFormSubmitButton button[kind="primary"]:hover { background: var(--plan-accent-dark); border-color: var(--plan-accent-dark); }
+        .stButton button[kind^="primary"], .stFormSubmitButton button[kind^="primary"] { background: var(--plan-accent); border-color: var(--plan-accent); color: #ffffff; }
+        .stButton button[kind^="primary"]:hover, .stFormSubmitButton button[kind^="primary"]:hover { background: var(--plan-accent-dark); border-color: var(--plan-accent-dark); }
         .stButton button:focus-visible, .stFormSubmitButton button:focus-visible,
         input:focus-visible, textarea:focus-visible, [role="combobox"]:focus-visible { outline: 3px solid var(--plan-attention); outline-offset: 2px; }
         button, input, textarea, select { min-height: 2.5rem; }
@@ -269,12 +269,12 @@ def apply_styles() -> None:
         [data-testid="stSidebar"] [data-testid="stButton"] button p,
         [data-testid="stSidebar"] .plan-sidebar-user strong,
         [data-testid="stSidebar"] .plan-sidebar-user span { color: #ffffff !important; }
-        [data-testid="stPopoverButton"], .stButton button:not([kind="primary"]), .stFormSubmitButton button:not([kind="primary"]) { background: var(--plan-surface); border-color: var(--plan-border); color: var(--plan-text); }
-        [data-testid="stPopoverButton"]:hover, .stButton button:not([kind="primary"]):hover, .stFormSubmitButton button:not([kind="primary"]):hover { background: var(--plan-selection); border-color: var(--plan-accent); color: var(--plan-text); }
-        .stButton button[kind="primary"], .stFormSubmitButton button[kind="primary"] { background: #0474c4; border-color: #0474c4; color: #ffffff; }
-        .stButton button[kind="primary"]:hover, .stFormSubmitButton button[kind="primary"]:hover { background: #06457f; border-color: #06457f; color: #ffffff; }
-        [data-testid="stSidebar"] [data-testid="stButton"] button:not([kind="primary"]) { background: #06457f; border-color: #a8c4ec; color: #ffffff; -webkit-text-fill-color: #ffffff; }
-        [data-testid="stSidebar"] [data-testid="stButton"] button:not([kind="primary"]):is(:hover, :focus-visible, :active) { background: #0474c4; border-color: #a8c4ec; color: #ffffff; }
+        [data-testid="stPopoverButton"], .stButton button:not([kind^="primary"]), .stFormSubmitButton button:not([kind^="primary"]) { background: var(--plan-surface); border-color: var(--plan-border); color: var(--plan-text); }
+        [data-testid="stPopoverButton"]:hover, .stButton button:not([kind^="primary"]):hover, .stFormSubmitButton button:not([kind^="primary"]):hover { background: var(--plan-selection); border-color: var(--plan-accent); color: var(--plan-text); }
+        .stButton button[kind^="primary"], .stFormSubmitButton button[kind^="primary"] { background: #0474c4; border-color: #0474c4; color: #ffffff; }
+        .stButton button[kind^="primary"]:hover, .stFormSubmitButton button[kind^="primary"]:hover { background: #06457f; border-color: #06457f; color: #ffffff; }
+        [data-testid="stSidebar"] [data-testid="stButton"] button:not([kind^="primary"]) { background: #06457f; border-color: #a8c4ec; color: #ffffff; -webkit-text-fill-color: #ffffff; }
+        [data-testid="stSidebar"] [data-testid="stButton"] button:not([kind^="primary"]):is(:hover, :focus-visible, :active) { background: #0474c4; border-color: #a8c4ec; color: #ffffff; }
         [data-testid="stDateInputField"], [data-testid="stTextInputRootElement"], [data-testid="stTextAreaRootElement"], [data-testid="stNumberInputContainer"], [data-baseweb="input"], [data-baseweb="textarea"], [data-baseweb="select"] > div { background: var(--plan-input); border-color: var(--plan-border); color: var(--plan-text); }
         [data-testid="stSelectbox"] [role="group"] { background: var(--plan-input); border-color: var(--plan-border); color: var(--plan-text); }
         [data-testid="stSelectbox"] [role="group"]:focus-within { border-color: var(--plan-accent); }
@@ -283,6 +283,8 @@ def apply_styles() -> None:
         body:has(.plan-dark-mode-marker) h2,
         body:has(.plan-dark-mode-marker) h3,
         body:has(.plan-dark-mode-marker) [data-testid="stMarkdownContainer"] p,
+        body:has(.plan-dark-mode-marker) [data-testid="stMarkdownContainer"] li,
+        body:has(.plan-dark-mode-marker) [data-testid="stMarkdownContainer"] strong,
         body:has(.plan-dark-mode-marker) [data-testid="stWidgetLabel"] p,
         body:has(.plan-dark-mode-marker) [data-testid="stExpander"] summary { color: var(--plan-text); }
         body:has(.plan-dark-mode-marker) [data-testid="stCaptionContainer"] p,

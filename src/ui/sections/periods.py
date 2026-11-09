@@ -8,18 +8,17 @@ from html import escape
 import streamlit as st
 
 from src.services.container import ApplicationServices
+from src.ui.dialog_state import PERIODS_DIALOG, active_dialog, close_dialog, open_dialog
+from src.ui.forms import new_period_form
 from src.ui.feedback import set_success_flash, show_action_error
 
 
-_DIALOG_STATE_KEY = "plan_periods_dialog"
-
-
 def open_periods_dialog() -> None:
-    st.session_state[_DIALOG_STATE_KEY] = True
+    open_dialog(PERIODS_DIALOG)
 
 
 def close_periods_dialog() -> None:
-    st.session_state.pop(_DIALOG_STATE_KEY, None)
+    close_dialog(PERIODS_DIALOG)
 
 
 def _date_range(period: dict) -> str:
@@ -86,37 +85,8 @@ def _periods_dialog(services: ApplicationServices, user: dict) -> None:
                 _finish("Período atual atualizado.")
 
     with st.expander("Adicionar período", icon=":material/add:", expanded=not periods):
-        today = date.today()
-        default_start = date(today.year, 1 if today.month <= 6 else 7, 1)
-        default_end = date(today.year, 6, 30) if today.month <= 6 else date(today.year, 12, 31)
-        with st.form("new_academic_period", border=False):
-            name = st.text_input("Nome *", placeholder="Ex.: 2026.2")
-            date_columns = st.columns(2)
-            start_date = date_columns[0].date_input(
-                "Data inicial", value=default_start, format="DD/MM/YYYY"
-            )
-            end_date = date_columns[1].date_input(
-                "Data final", value=default_end, format="DD/MM/YYYY"
-            )
-            st.caption("Campos com \\* são obrigatórios.")
-            submitted = st.form_submit_button(
-                "Adicionar período", type="primary", width="stretch"
-            )
-        if submitted:
-            try:
-                services.academic_periods.create(
-                    user_id=user["_id"],
-                    current_period_id=current_period_id,
-                    name=name,
-                    start_date=start_date,
-                    end_date=end_date,
-                )
-            except ValueError as error:
-                st.error(str(error))
-            except Exception as error:
-                show_action_error("adicionar o período acadêmico", error)
-            else:
-                _finish("Período acadêmico adicionado.")
+        if new_period_form(services, user, key="new_academic_period"):
+            _finish("Período acadêmico adicionado.")
 
     archivable = [
         period
@@ -162,7 +132,7 @@ def _periods_dialog(services: ApplicationServices, user: dict) -> None:
 
 
 def render_periods_dialog(services: ApplicationServices, user: dict) -> None:
-    if st.session_state.get(_DIALOG_STATE_KEY):
+    if active_dialog() == PERIODS_DIALOG:
         _periods_dialog(services, user)
 
 
