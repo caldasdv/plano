@@ -43,6 +43,7 @@ def apply_styles() -> None:
         [data-testid="stSidebarNav"] > ul > li > div:not(:has(a)) { color: #a8c4ec; font-size: .68rem; font-weight: 800; letter-spacing: .12em; margin: 1.1rem .7rem .35rem; text-transform: uppercase; }
         [data-testid="stNavSectionHeader"], [data-testid="stNavSectionHeader"] p { color: #a8c4ec; font-size: .72rem; font-weight: 800; letter-spacing: .12em; margin: 1.1rem .7rem .35rem; text-transform: uppercase; }
         [data-testid="stSidebarNav"] li div a { border-radius: 10px; color: #ffffff; font-weight: 650; padding: .55rem .7rem; }
+        [data-testid="stSidebarNav"] li div a p { font-size: 1rem; }
         [data-testid="stSidebarNav"] li div a:hover { background: rgba(168, 196, 236, .16); color: #ffffff; }
         [data-testid="stSidebarNav"] li div a[aria-current="page"] { background: #0474c4; box-shadow: none; color: #ffffff; }
         [data-testid="stSidebarNav"] li div a:focus-visible, [data-testid="stSidebar"] button:focus-visible { outline: 3px solid #ffffff; outline-offset: 2px; }
